@@ -10,6 +10,7 @@ import app.models as models
 
 @api_view(['POST'])
 def register(request):
+    # TODO: Add second password field to check if they match
     body = json.loads(request.body.decode('utf-8'))
     hashed_password = hashers.make_password(body['password'])
     models.User.objects.create(
