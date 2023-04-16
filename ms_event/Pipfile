@@ -8,6 +8,7 @@ django = "*"
 gunicorn = "*"
 pyyaml = "*"
 psycopg2-binary = "*"
+pillow = "*"
 
 [dev-packages]
 
