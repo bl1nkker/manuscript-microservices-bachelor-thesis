@@ -9,6 +9,9 @@ gunicorn = "*"
 pyyaml = "*"
 psycopg2-binary = "*"
 pillow = "*"
+pika = "*"
+tenacity = "*"
+pytest-django = "*"
 
 [dev-packages]
 
