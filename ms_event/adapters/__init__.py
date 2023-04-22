@@ -1,1 +1,2 @@
-from .event_repository import AbstractEventRepository, EventRepository
+from .event_repository import AbstractEventRepository, EventRepository, FakeEventRepository
+from .user_repository import AbstractUserRepository, ManuscriptUserRepository, FakeManuscriptUserRepository

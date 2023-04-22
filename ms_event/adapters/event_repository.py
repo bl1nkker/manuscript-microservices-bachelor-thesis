@@ -47,7 +47,7 @@ class AbstractEventRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list(self, **kwargs):
+    def list(self, include_deactivated=False, **kwargs):
         ''' 
         Возвращает список [Event]
 
@@ -94,3 +94,44 @@ class EventRepository(AbstractEventRepository):
         event = models.Event.objects.get(id=id)
         event.is_active = False
         event.save()
+
+
+class FakeEventRepository(AbstractEventRepository):
+
+    def __init__(self) -> None:
+        self._events = []
+        self._id = 0
+
+    def get(self, **kwargs) -> Union[fake_models.Event, None]:
+        return next((event for event in self._events if all([
+            getattr(event, key) == value for key, value in kwargs.items()
+        ])), None)
+
+    def create(self, **kwargs):
+        event = fake_models.Event(**kwargs)
+        self._id += 1
+        event.id = self._id
+        self._events.append(event)
+        return event
+
+    def edit(self, id, **kwargs):
+        event = next((event for event in self._events if event.id == id), None)
+        for key, value in kwargs.items():
+            setattr(event, key, value)
+        self._events = [event if event.id ==
+                        id else event for event in self._events]
+        return event
+
+    def list(self, include_deactivated=False, **kwargs, ) -> List[fake_models.Event]:
+        if 'tags__contains' in kwargs:
+            return [event for event in self._events if kwargs['tags__contains'] in event.tags]
+        return [event for event in self._events if all([
+            getattr(event, key) == value for key, value in kwargs.items()
+        ]) and event.is_active]
+
+    def deactivate(self, id):
+        event = next((event for event in self._events if event.id == id), None)
+        event.is_active = False
+        self._events = [event if event.id ==
+                        id else event for event in self._events]
+        return event

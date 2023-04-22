@@ -1,1 +1,1 @@
-from .user_repository import ManuscriptUserRepository, FakeManuscriptUserRepository
+from .user_repository import AbstractUserRepository, ManuscriptUserRepository, FakeManuscriptUserRepository

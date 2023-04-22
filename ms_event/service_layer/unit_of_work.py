@@ -7,6 +7,7 @@ import adapters as repository
 
 class AbstractUnitOfWork(abc.ABC):
     event: repository.AbstractEventRepository
+    user: repository.AbstractUserRepository
 
     def __enter__(self) -> AbstractUnitOfWork:
         return self
@@ -27,6 +28,7 @@ class DjangoORMUnitOfWork(AbstractUnitOfWork):
 
     def __enter__(self):
         self.event = repository.EventRepository()
+        self.user = repository.ManuscriptUserRepository()
         return super().__enter__()
 
     def __exit__(self, *args):
@@ -42,6 +44,7 @@ class DjangoORMUnitOfWork(AbstractUnitOfWork):
 class FakeUnitOfWork(AbstractUnitOfWork):
     def __init__(self):
         self.event = repository.FakeEventRepository()
+        self.user = repository.FakeManuscriptUserRepository()
 
     def commit(self):
         self.committed = True

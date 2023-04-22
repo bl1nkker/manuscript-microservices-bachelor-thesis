@@ -192,6 +192,46 @@ class TestDjangoORMUnitOfWork(TransactionTestCase):
                 self.uow.event.create(**data)
             tag_events = self.uow.event.list(tags__contains='test_tag3')
             self.assertEqual(3, len(tag_events))
+
+    def test_event_repository_list_should_list_all_events(self):
+        with self.uow:
+            for i in range(10):
+                city = 'Qostanay'
+                image = SimpleUploadedFile(
+                    f"test_image{i}.jpg", b"file_content", content_type="image/jpeg")
+                data = {
+                    "name": f"test_event{i}",
+                    "image": image,
+                    "location": city,
+                    "location_url": 'https://www.google.com',
+                    "description": 'Test description',
+                    "full_description": 'Test full description',
+                    "is_active": False,
+                    "start_date": '2020-01-01',
+                    "end_date": '2020-01-02',
+                    "author": self.user,
+                    "tags": ['test_tag1', 'test_tag2'],
+                }
+                self.uow.event.create(**data)
+            for i in range(3):
+                image = SimpleUploadedFile(
+                    f"test_image{i}.jpg", b"file_content", content_type="image/jpeg")
+                data = {
+                    "name": f"test_event{i}",
+                    "image": image,
+                    "location": 'Almaty',
+                    "location_url": 'https://www.google.com',
+                    "description": 'Test description',
+                    "full_description": 'Test full description',
+                    "start_date": '2020-01-01',
+                    "end_date": '2020-01-02',
+                    "author": self.user,
+                    "tags": ['test_tag1', 'test_tag2'],
+                }
+                self.uow.event.create(**data)
+            events = self.uow.event.list(include_deactivated=True)
+            self.assertEqual(13, len(events))
+
     # Get
 
     def test_event_repository_get_should_get_event(self):

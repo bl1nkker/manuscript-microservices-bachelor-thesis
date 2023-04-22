@@ -6,7 +6,7 @@ import adapters as repository
 
 
 class AbstractUnitOfWork(abc.ABC):
-    user: repository.ManuscriptUserRepository
+    user: repository.AbstractUserRepository
 
     def __enter__(self) -> AbstractUnitOfWork:
         return self
