@@ -55,12 +55,12 @@ class TestUserServices(TransactionTestCase):
     def test_get_user_service_should_return_result_with_user_data(self):
         user = self.uow.user.create(username="test", password="test")
         expected = Result(data=user.to_dict(), error=None)
-        result = services.get_user_service(uow=self.uow, id=user.id)
+        result = services.get_user_service(uow=self.uow, uid=user.id)
         self.assertEqual(expected, result)
 
     def test_get_user_service_should_return_result_with_error_when_user_is_not_found(self):
         expected = Result(data=None, error=exceptions.UserNotFoundException)
-        result = services.get_user_service(uow=self.uow, id=999)
+        result = services.get_user_service(uow=self.uow, uid=999)
         self.assertEqual(expected, result)
 
     # Get Me

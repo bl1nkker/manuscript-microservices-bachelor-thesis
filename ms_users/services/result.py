@@ -4,7 +4,7 @@ class Result():
         self.error = error
 
     @property
-    def is_success(self):
+    def is_ok(self):
         return self.error is None
 
     @property
