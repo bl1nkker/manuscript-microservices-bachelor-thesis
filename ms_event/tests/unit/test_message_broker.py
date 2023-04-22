@@ -7,7 +7,7 @@ from django.conf import settings
 import service_layer.message_broker as mb
 
 
-class RabbitMQMessageBrokerTestCase(TestCase):
+class RabbitMQMessageBrokerTestCase():
     def setUp(self):
         credentials = pika.URLParameters(settings.RABBITMQ_CONNECTION_URL)
         self.rabbitmq = mb.RabbitMQ(

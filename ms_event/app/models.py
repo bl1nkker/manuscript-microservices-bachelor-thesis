@@ -22,7 +22,7 @@ class ManuscriptUser(models.Model):
 class Event(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(
-        upload_to='uploads/images/events/', null=True, blank=True)
+        upload_to='images/events/', null=True, blank=True)
 
     location = models.CharField(max_length=100, default='Almaty, Kazakhstan')
     location_url = models.URLField(blank=True, default='')
@@ -33,6 +33,7 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(ManuscriptUser, on_delete=models.CASCADE)
     tags = models.JSONField(default=list)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         return f'{self.name} ({self.type.name}): {self.start_date} - {self.end_date}'
@@ -41,7 +42,7 @@ class Event(models.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'image': self.image.url if self.image else None,
+            'image': self.get_image_url(),
             'location': self.location,
             'location_url': self.location_url,
             'description': self.description,
@@ -50,4 +51,10 @@ class Event(models.Model):
             'end_date': self.end_date,
             'author': self.author.to_dict(),
             'tags': self.tags,
+            'is_active': self.is_active,
         }
+
+    def get_image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return None
