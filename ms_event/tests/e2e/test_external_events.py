@@ -32,7 +32,7 @@ class TestUserEvents():
             }
             # Subscribe to the queue and start consuming messages
             mb.subscribe(
-                queue=settings.RABBITMQ_EVENT_QUEUE, callback=ec.handle_user_creation, routing_key=settings.RABBITMQ_EVENT_ROUTING_KEY)
+                queue=settings.RABBITMQ_QUEUE, callback=ec.handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
             # Publish a message to an exchange
             mb.publish(
                 routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY, message=json.dumps(user_data))

@@ -21,7 +21,7 @@ class RabbitMQMessageBrokerTestCase(TestCase):
             self.assertIsInstance(rabbitmq.channel,
                                   pika.adapters.blocking_connection.BlockingChannel)
 
-    def test_rabbitmq_event_queue_receive_message(self):
+    def test_RABBITMQ_QUEUE_receive_message(self):
         # Define a callback function for handling received messages
         def callback(ch, method, properties, body):
             self.assertEqual(body, b"Hello, RabbitMQ!")
@@ -30,29 +30,11 @@ class RabbitMQMessageBrokerTestCase(TestCase):
         with self.rabbitmq as rabbitmq:
             # Publish a message to an exchange
             rabbitmq.publish(
-                routing_key='manuscript.services.event', message="Hello, RabbitMQ!")
+                routing_key=settings.RABBITMQ_EVENT_ROUTING_KEY, message="Hello, RabbitMQ!")
 
             # Subscribe to the queue and start consuming messages
             rabbitmq.subscribe(
-                queue=settings.RABBITMQ_EVENT_QUEUE, callback=callback, routing_key=settings.RABBITMQ_EVENT_ROUTING_KEY)
-
-            # Wait for the callback to be invoked
-            rabbitmq.channel.start_consuming()
-
-    def test_rabbitmq_event_queue_receive_message_on_services_broadcast(self):
-        # Define a callback function for handling received messages
-        def callback(ch, method, properties, body):
-            self.assertEqual(body, b"Hello, RabbitMQ!")
-            ch.stop_consuming()
-
-        with self.rabbitmq as rabbitmq:
-            # Publish a message to an exchange
-            rabbitmq.publish(
-                routing_key='manuscript.services.any', message="Hello, RabbitMQ!")
-
-            # Subscribe to the queue and start consuming messages
-            rabbitmq.subscribe(
-                queue=settings.RABBITMQ_EVENT_QUEUE, callback=callback, routing_key=settings.RABBITMQ_EVENT_ROUTING_KEY)
+                queue=settings.RABBITMQ_QUEUE, callback=callback, routing_key=settings.RABBITMQ_EVENT_ROUTING_KEY)
 
             # Wait for the callback to be invoked
             rabbitmq.channel.start_consuming()

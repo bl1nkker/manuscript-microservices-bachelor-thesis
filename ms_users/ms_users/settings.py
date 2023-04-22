@@ -12,10 +12,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-import yaml
 
 with open('app.yaml') as f:
-    database_settings = yaml.safe_load(f)
+    import yaml
+    cfg = yaml.safe_load(f)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -134,12 +134,12 @@ WSGI_APPLICATION = 'ms_users.wsgi.application'
 
 DATABASES = {
     'default': {
-        "ENGINE": database_settings['DB_ENGINE'],
-        "NAME": database_settings['DB_NAME'],
-        "USER": database_settings['DB_USER'],
-        "PASSWORD": database_settings['DB_PASS'],
-        "HOST": database_settings['DB_HOST'],
-        "PORT": database_settings['DB_PORT'],
+        "ENGINE": cfg['DB_ENGINE'],
+        "NAME": cfg['DB_NAME'],
+        "USER": cfg['DB_USER'],
+        "PASSWORD": cfg['DB_PASS'],
+        "HOST": cfg['DB_HOST'],
+        "PORT": cfg['DB_PORT'],
     }
 }
 
@@ -216,3 +216,17 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+# RabbitMQ settings
+# or the hostname where RabbitMQ is running
+RABBITMQ_HOST = cfg['RABBITMQ_HOST']
+RABBITMQ_PORT = cfg['RABBITMQ_PORT']  # default RabbitMQ port
+RABBITMQ_VHOST = cfg['RABBITMQ_VHOST']  # default virtual host
+RABBITMQ_USER = cfg['RABBITMQ_USER']  # default RabbitMQ username
+RABBITMQ_PASSWORD = cfg['RABBITMQ_PASSWORD']  # default RabbitMQ password
+RABBITMQ_EXCHANGE_NAME = cfg['RABBITMQ_EXCHANGE_NAME']
+RABBITMQ_QUEUE = cfg['RABBITMQ_QUEUE']
+RABBITMQ_USER_CREATE_ROUTING_KEY = cfg['RABBITMQ_USER_CREATE_ROUTING_KEY']
+
+# RabbitMQ connection URL
+RABBITMQ_CONNECTION_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}'

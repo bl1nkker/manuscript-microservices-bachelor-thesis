@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-import yaml
 import os
 
 with open('app.yaml') as f:
+    import yaml
     cfg = yaml.safe_load(f)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -145,10 +145,7 @@ RABBITMQ_VHOST = cfg['RABBITMQ_VHOST']  # default virtual host
 RABBITMQ_USER = cfg['RABBITMQ_USER']  # default RabbitMQ username
 RABBITMQ_PASSWORD = cfg['RABBITMQ_PASSWORD']  # default RabbitMQ password
 RABBITMQ_EXCHANGE_NAME = cfg['RABBITMQ_EXCHANGE_NAME']
-RABBITMQ_USERS_ROUTING_KEY = cfg['RABBITMQ_USERS_ROUTING_KEY']
-RABBITMQ_TEAMS_ROUTING_KEY = cfg['RABBITMQ_TEAMS_ROUTING_KEY']
-RABBITMQ_EVENT_ROUTING_KEY = cfg['RABBITMQ_EVENT_ROUTING_KEY']
-RABBITMQ_EVENT_QUEUE = cfg['RABBITMQ_EVENT_QUEUE']
+RABBITMQ_QUEUE = cfg['RABBITMQ_QUEUE']
 RABBITMQ_USER_CREATE_ROUTING_KEY = cfg['RABBITMQ_USER_CREATE_ROUTING_KEY']
 
 # RabbitMQ connection URL
