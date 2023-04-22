@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.conf import settings
 import app.models as models
-import service_layer.message_broker as mb
+import services.message_broker as mb
 
 
 @api_view(['POST'])

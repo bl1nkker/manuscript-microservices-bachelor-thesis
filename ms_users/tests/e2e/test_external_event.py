@@ -4,7 +4,7 @@ from django.conf import settings
 from django.test import TestCase, Client
 
 
-import service_layer.message_broker as mb
+import services.message_broker as mb
 import app.models as models
 
 

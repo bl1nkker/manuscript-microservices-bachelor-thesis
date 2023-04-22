@@ -140,6 +140,14 @@ DATABASES = {
         "PASSWORD": cfg['DB_PASS'],
         "HOST": cfg['DB_HOST'],
         "PORT": cfg['DB_PORT'],
+    },
+    'test': {
+        "ENGINE": cfg['DB_ENGINE'],
+        "USER": cfg['DB_USER'],
+        "PASSWORD": cfg['DB_PASS'],
+        "NAME": cfg['DB_TEST_NAME'],
+        "HOST": cfg['DB_HOST'],
+        "PORT": cfg['DB_PORT'],
     }
 }
 
