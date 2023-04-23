@@ -14,7 +14,7 @@ class Event():
 
 
 class ManuscriptUser:
-    def __init__(self, username: str, password: str, id: int, first_name: str = '', last_name: str = '', email=None):
+    def __init__(self, username: str,  id: int, first_name: str = '', last_name: str = '', email=None, password: str = '123'):
         self.id = id
         self.username = username
         self.email = username
@@ -32,10 +32,25 @@ class ManuscriptUser:
 
 
 class Team:
-    def __init__(self, name, leader, event, is_active=True, members=[], id=None):
+    def __init__(self, name,  leader, event, is_active=True, members=[], id=None, image='',):
         self.id = id
         self.name = name
+        self.image = image
         self.leader = leader
         self.event = event
         self.members = members
         self.is_active = is_active
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'image': self.image,
+            'leader': self.leader,
+            'event': self.event,
+            'members': self.members,
+            'is_active': self.is_active,
+        }
+
+    def get_members(self):
+        return self.members

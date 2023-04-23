@@ -19,7 +19,7 @@ def create_event(name='test_event'):
 
 
 @override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
-class TestDjangoORMUnitOfWork(TransactionTestCase):
+class TestDjangoORMUnitOfWorkTeam(TransactionTestCase):
     def setUp(self) -> None:
         self.uow = uow.DjangoORMUnitOfWork()
         self.user = create_user()

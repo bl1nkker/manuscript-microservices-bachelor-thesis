@@ -71,3 +71,8 @@ class RabbitMQ(MessageBroker):
     def disconnect(self):
         self.channel.close()
         self.connection.close()
+
+    def consume_last_message(self, queue):
+        method, properties, body = self.channel.basic_get(
+            queue=queue, auto_ack=True)
+        return body

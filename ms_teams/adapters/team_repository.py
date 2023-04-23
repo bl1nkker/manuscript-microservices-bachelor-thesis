@@ -104,16 +104,31 @@ class FakeTeamRepository(AbstractTeamRepository):
         self._id = 0
 
     def get(self, **kwargs) -> Union[fake_models.Team, None]:
-        return super().get(**kwargs)
+        return next((team for team in self._teams if all(getattr(team, key) == value for key, value in kwargs.items())), None)
 
     def create(self, **kwargs):
-        return super().create(**kwargs)
+        self._id += 1
+        team = fake_models.Team(id=self._id, **kwargs)
+        self._teams.append(team)
+        return team
 
     def edit(self, id, **kwargs):
-        return super().edit(id, **kwargs)
+        team = next((team for team in self._teams if team.id == id), None)
+        for key, value in kwargs.items():
+            if key == 'members':
+                team.members = value
+                continue
+            setattr(team, key, value)
+        self._teams = [team if team.id ==
+                       id else team for team in self._teams]
+        return team
 
     def list(self, include_deactivated=False, **kwargs, ) -> List[fake_models.Team]:
-        return super().list(include_deactivated, **kwargs)
+        return [team for team in self._teams if all(getattr(team, key) == value for key, value in kwargs.items())]
 
     def deactivate(self, id):
-        return super().deactivate(id)
+        team = next((team for team in self._teams if team.id == id), None)
+        team.is_active = False
+        self._teams = [team if team.id ==
+                       id else team for team in self._teams]
+        return team

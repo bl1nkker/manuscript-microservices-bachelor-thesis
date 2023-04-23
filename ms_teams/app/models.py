@@ -63,3 +63,16 @@ class Team(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_members(self):
+        return self.members.all()
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'leader': self.leader.to_dict(),
+            'members': [member.to_dict() for member in self.members.all()],
+            'event': self.event.to_dict(),
+            'is_active': self.is_active,
+        }

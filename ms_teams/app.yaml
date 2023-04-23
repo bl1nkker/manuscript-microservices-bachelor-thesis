@@ -27,5 +27,6 @@ RABBITMQ_PASSWORD: manuscript # default RabbitMQ password
 RABBITMQ_EXCHANGE_NAME: manuscript.services # default RabbitMQ exchange name
 RABBITMQ_QUEUE: event_queue
 RABBITMQ_USER_CREATE_ROUTING_KEY: user.created
+RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY: user.kicked
 RABBITMQ_EVENT_EDIT_ROUTING_KEY: event.edited
 RABBITMQ_EVENT_CREATE_ROUTING_KEY: event.created

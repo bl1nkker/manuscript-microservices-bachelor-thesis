@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 from service_layer.result import Result
 import service_layer.services as services
