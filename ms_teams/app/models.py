@@ -29,6 +29,10 @@ class ManuscriptUser(models.Model):
 
         return token
 
+    @property
+    def username(self):
+        return self.user.username
+
 
 class Event(models.Model):
     name = models.CharField(max_length=100)

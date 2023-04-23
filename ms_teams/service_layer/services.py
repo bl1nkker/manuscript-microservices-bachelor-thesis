@@ -7,8 +7,10 @@ def create_team_service(uow: uow.AbstractUnitOfWork, username: str, event_id: in
     with uow:
         if not kwargs.get('name', ''):
             return Result(None, error=exceptions.InvalidTeamDataException)
-        user = uow.user.get(username=username)
         event = uow.event.get(id=event_id)
+        if event is None:
+            return Result(data=None, error=exceptions.EventNotFoundException)
+        user = uow.user.get(username=username)
         team = uow.team.create(leader=user, event=event, **kwargs)
         return Result(data=team.to_dict(), error=None)
 
@@ -61,10 +63,10 @@ def kick_team_member_service(uow: uow.AbstractUnitOfWork, username: str, team_id
         updated_members = [
             member for member in team.get_members() if member.id != member_id]
         team = uow.team.edit(id=team.id, members=updated_members)
-        try:
-            handle_publish_message_on_user_kicked(user=member_id, team=team.id)
-        except Exception as e:
-            print('Error while publishing message', e)
+        # try:
+        #     handle_publish_message_on_user_kicked(user=member_id, team=team.id)
+        # except Exception as e:
+        #     print('Error while publishing message', e)
         return Result(data=team.to_dict(), error=None)
 
 

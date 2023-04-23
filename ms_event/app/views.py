@@ -5,17 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.response import Response
 import service_layer.services as services
 import service_layer.unit_of_work as unit_of_work
-# Create your views here.
 
-
-# def create_event(request):
-#     if request.method == 'POST':
-#         body = json.loads(request.body.decode('utf-8'))
-#         body['author'] = models.ManuscriptUser.objects.get(id=body['author'])
-#         event = models.Event.objects.create(**body)
-#         # Send redis message
-#         return JsonResponse(data={'id': event.id}, status=201)
-#     return HttpResponse(status=403)
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticatedOrReadOnly])
@@ -28,7 +18,7 @@ def events(request):
         if result.is_ok:
             return Response(result.to_response(), status=200)
         else:
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
     elif request.method == 'POST':
         body = {}
         for key, value in request.data.items():
@@ -43,7 +33,7 @@ def events(request):
         if result.is_ok:
             return Response(result.to_response(), status=201)
         else:
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -69,7 +59,7 @@ def event(request, event_id):
         if result.is_ok:
             return Response(result.to_response(), status=204)
         else:
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
     elif request.method == 'DELETE':
         username = request.user.username
         result = services.deactivate_event_service(
@@ -77,4 +67,4 @@ def event(request, event_id):
         if result.is_ok:
             return Response(result.to_response(), status=204)
         else:
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)

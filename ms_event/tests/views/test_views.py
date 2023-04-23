@@ -2,7 +2,6 @@ import json
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APIClient as Client
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test.client import MULTIPART_CONTENT, encode_multipart, BOUNDARY
 
 
 import service_layer.unit_of_work as uow
@@ -223,7 +222,7 @@ class TestEventManagement(TransactionTestCase):
         token = self.user.generate_jwt_token()
         response = self.client.post(
             f"/events/", data=body, **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 400)
         content = json.loads(response.content)
         self.assertEqual(
             content['error'], exceptions.INVALID_EVENT_DATA_EXCEPTION_MESSAGE)
@@ -289,7 +288,7 @@ class TestEventManagement(TransactionTestCase):
         token = self.user.generate_jwt_token()
         response = self.client.put(
             f"/events/{self.event.id}", data=body, **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(
             content['error'], exceptions.INVALID_EVENT_DATA_EXCEPTION_MESSAGE)
@@ -308,7 +307,7 @@ class TestEventManagement(TransactionTestCase):
         token = self.user.generate_jwt_token()
         response = self.client.put(
             f"/events/999", data=body, **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(
             content['error'], exceptions.EVENT_NOT_FOUND_EXCEPTION_MESSAGE)
@@ -328,7 +327,7 @@ class TestEventManagement(TransactionTestCase):
         token = another_user.generate_jwt_token()
         response = self.client.put(
             f"/events/{self.event.id}", data=body, **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(
             content['error'], exceptions.USER_IS_NOT_EVENT_AUTHOR_EXCEPTION_MESSAGE)
@@ -348,7 +347,7 @@ class TestEventManagement(TransactionTestCase):
             f"/events/{self.event.id}", data=body)
         self.assertEqual(response.status_code, 403)
 
-    def test_deactivate_event_service_should_deactivate_event(self):
+    def test_event_delete_should_deactivate_event(self):
         token = self.user.generate_jwt_token()
         response = self.client.delete(
             f"/events/{self.event.id}", **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
@@ -367,26 +366,26 @@ class TestEventManagement(TransactionTestCase):
         self.assertEqual(content['data']["tags"], ['test_tag1', 'test_tag2'])
         self.assertEqual(content['data']["author"], self.user.to_dict())
 
-    def test_deactivate_event_service_should_return_error_when_event_is_not_found(self):
+    def test_event_delete_should_return_error_when_event_is_not_found(self):
         token = self.user.generate_jwt_token()
         response = self.client.delete(
             f"/events/999", **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(content['error'],
                          exceptions.EVENT_NOT_FOUND_EXCEPTION_MESSAGE)
 
-    def test_deactivate_event_service_should_return_error_when_user_is_not_author(self):
+    def test_event_delete_should_return_error_when_user_is_not_author(self):
         another_user = create_user(username='test_user2')
         token = another_user.generate_jwt_token()
         response = self.client.delete(
             f"/events/{self.event.id}", **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(content['error'],
                          exceptions.USER_IS_NOT_EVENT_AUTHOR_EXCEPTION_MESSAGE)
 
-    def test_deactivate_event_service_should_return_error_when_user_is_anonymous(self):
+    def test_event_delete_should_return_error_when_user_is_anonymous(self):
         response = self.client.delete(
             f"/events/{self.event.id}")
         self.assertEqual(response.status_code, 403)
