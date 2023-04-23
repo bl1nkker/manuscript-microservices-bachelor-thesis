@@ -3,7 +3,7 @@ import json
 import service_layer.message_broker as mb
 from django.conf import settings
 import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_event.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_teams.settings'
 
 
 def start():

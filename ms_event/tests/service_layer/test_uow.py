@@ -1,8 +1,7 @@
 import app.models as models
 import service_layer.unit_of_work as uow
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
 import shutil
 
 TEST_DIR = 'test_data'
@@ -19,7 +18,6 @@ class TestDjangoORMUnitOfWork(TransactionTestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-
         try:
             shutil.rmtree(TEST_DIR)
         except OSError:
