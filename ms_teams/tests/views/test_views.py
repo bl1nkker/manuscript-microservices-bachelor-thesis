@@ -119,6 +119,7 @@ class TestTeamManagement(TransactionTestCase):
         content = json.loads(response.content)
         self.assertEqual(
             content['error'], exceptions.EVENT_NOT_FOUND_EXCEPTION_MESSAGE)
+
     # Get
 
     def test_team_get_should_return_team_data(self):

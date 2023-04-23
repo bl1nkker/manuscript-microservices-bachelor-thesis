@@ -24,7 +24,7 @@ def handle_user_creation(ch, method, properties, body):
     import app.models as models
     user = models.User.objects.create(
         username=data['username'],
-        email=data['email'],
+        email=data['username'],
         first_name=data['first_name'],
         last_name=data['last_name'],
     )
