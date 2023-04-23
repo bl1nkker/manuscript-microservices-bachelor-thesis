@@ -67,11 +67,9 @@ class TestEventServices(TestCase):
                 "author": self.user,
                 "tags": ['test_tag1', 'test_tag2'],
             })
-        expected = Result(data={
-            "events": [
-                event.to_dict() for event in self.uow.event.list(location='Almaty')
-            ]
-        }, error=None)
+        expected = Result(data=[
+            event.to_dict() for event in self.uow.event.list(location='Almaty')
+        ], error=None)
         result = services.list_events_service(uow=self.uow, location='Almaty')
         self.assertEqual(result, expected)
 
@@ -102,11 +100,9 @@ class TestEventServices(TestCase):
                 "author": self.user,
                 "tags": ['test_tag3', 'test_tag4'],
             })
-        expected = Result(data={
-            "events": [
-                event.to_dict() for event in self.uow.event.list(tags__contains='test_tag3')
-            ]
-        }, error=None)
+        expected = Result(data=[
+            event.to_dict() for event in self.uow.event.list(tags__contains='test_tag3')
+        ], error=None)
         result = services.list_events_service(
             uow=self.uow,  tags__contains='test_tag3')
         self.assertEqual(result, expected)
@@ -139,15 +135,13 @@ class TestEventServices(TestCase):
                 "author": self.user,
                 "tags": ['test_tag3', 'test_tag4'],
             })
-        expected = Result(data={
-            "events": [
-                event.to_dict() for event in self.uow.event.list()
-            ]
-        }, error=None)
+        expected = Result(data=[
+            event.to_dict() for event in self.uow.event.list()
+        ], error=None)
         result = services.list_events_service(
             uow=self.uow)
         self.assertEqual(result, expected)
-        self.assertEqual(len(result.data['events']), 5)
+        self.assertEqual(len(result.data), 5)
 
     def test_list_events_service_should_return_list_of_user_events_by_user(self):
         my_user = self.uow.user.create(username="my_user", password="my_user")
@@ -178,15 +172,12 @@ class TestEventServices(TestCase):
                 "author": self.user,
                 "tags": ['test_tag3', 'test_tag4'],
             })
-        expected = Result(data={
-            "events": [
-                event.to_dict() for event in self.uow.event.list(author=my_user)
-            ]
-        }, error=None)
+        expected = Result(data=[event.to_dict() for event in self.uow.event.list(
+            author=my_user)], error=None)
         result = services.list_events_service(
             uow=self.uow, author=my_user)
         self.assertEqual(result, expected)
-        self.assertEqual(len(result.data['events']), 5)
+        self.assertEqual(len(result.data), 5)
 
     # Create event
     def test_create_event_service_should_return_event(self):
@@ -204,7 +195,7 @@ class TestEventServices(TestCase):
             "tags": ['test_tag1', 'test_tag2'],
             "is_active": True,
         }, error=None)
-        result = services.create_event_service(uow=self.uow, **{
+        result = services.create_event_service(uow=self.uow, username=self.user.username, **{
             "name": "test_event",
             "image": 'test_image',
             "location": 'Almaty',
@@ -213,7 +204,6 @@ class TestEventServices(TestCase):
             "full_description": 'Test full description',
             "start_date": '2020-01-01',
             "end_date": '2020-01-02',
-            "author": self.user,
             "tags": ['test_tag1', 'test_tag2'],
         })
         self.assertEqual(result, expected)
@@ -221,7 +211,7 @@ class TestEventServices(TestCase):
     def test_create_event_service_should_return_result_with_error_when_data_is_invalid(self):
         expected = Result(
             data=None, error=exceptions.InvalidEventDataException)
-        result = services.create_event_service(uow=self.uow, **{
+        result = services.create_event_service(uow=self.uow, username=self.user.username, **{
             "name": "",
             "image": 'test_image',
             "location": 'Almaty',
@@ -230,12 +220,11 @@ class TestEventServices(TestCase):
             "full_description": 'Test full description',
             "start_date": '2020-01-01',
             "end_date": '2020-01-02',
-            "author": self.user,
             "tags": ['test_tag1', 'test_tag2'],
         })
         self.assertEqual(result, expected)
-
     # Edit event
+
     def test_edit_event_service_should_return_event(self):
         event = self.uow.event.create(**{
             "name": "test_event",
@@ -263,7 +252,7 @@ class TestEventServices(TestCase):
             "tags": ['test_tag1', 'test_tag2'],
             "is_active": True,
         }, error=None)
-        result = services.edit_event_service(uow=self.uow, id=1, **{
+        result = services.edit_event_service(uow=self.uow, id=1, username=self.user.username, **{
             "name": "test_event updated",
             "image": 'test_image',
             "location": 'Almaty',
@@ -292,7 +281,7 @@ class TestEventServices(TestCase):
         })
         expected = Result(
             data=None, error=exceptions.InvalidEventDataException)
-        result = services.edit_event_service(uow=self.uow, id=1, **{
+        result = services.edit_event_service(uow=self.uow, id=1, username=self.user.username, **{
             "name": "",
             "image": 'test_image',
             "location": 'Almaty',
@@ -308,7 +297,7 @@ class TestEventServices(TestCase):
 
     def test_edit_event_service_should_return_result_with_error_when_event_is_not_found(self):
         expected = Result(data=None, error=exceptions.EventNotFoundException)
-        result = services.edit_event_service(uow=self.uow, id=999, **{
+        result = services.edit_event_service(uow=self.uow, id=999, username=self.user.username, **{
             "name": "test_event updated",
             "image": 'test_image',
             "location": 'Almaty',
@@ -322,9 +311,36 @@ class TestEventServices(TestCase):
         })
         self.assertEqual(result, expected)
 
-    def test_deactivate_event_service_should_return_result_with_error_when_user_is_not_author(self):
-        pass
-    # Deactivate event
+    def test_edit_event_service_should_return_result_with_error_when_user_is_not_author(self):
+        another_user = self.uow.user.create(
+            username="another_user", password="test")
+        self.uow.event.create(**{
+            "name": "test_event",
+            "image": 'test_image',
+            "location": 'Almaty',
+            "location_url": 'https://www.google.com',
+            "description": 'Test description',
+            "full_description": 'Test full description',
+            "start_date": '2020-01-01',
+            "end_date": '2020-01-02',
+            "author": another_user,
+            "tags": ['test_tag1', 'test_tag2'],
+        })
+        expected = Result(
+            data=None, error=exceptions.UserIsNotEventAuthorException)
+        result = services.edit_event_service(uow=self.uow, id=1, username=self.user.username, **{
+            "name": "test_event updated",
+            "image": 'test_image',
+            "location": 'Almaty',
+            "location_url": 'https://www.google.com',
+            "description": 'Test description',
+            "full_description": 'Test full description',
+            "start_date": '2020-11-01',
+            "end_date": '2020-11-02',
+            "author": self.user,
+            "tags": ['test_tag1', 'test_tag2'],
+        })
+        self.assertEqual(result, expected)
 
     def test_deactivate_event_service_should_deactivate_event(self):
         self.uow.event.create(**{
@@ -354,11 +370,32 @@ class TestEventServices(TestCase):
             "is_active": False,
         }, error=None)
         result = services.deactivate_event_service(
-            uow=self.uow, id=1, uid=self.user.id)
+            uow=self.uow, id=1, username=self.user.username)
         self.assertEqual(result, expected)
 
     def test_deactivate_event_service_should_return_error_when_event_is_not_found(self):
-        pass
+        expected = Result(data=None, error=exceptions.EventNotFoundException)
+        result = services.deactivate_event_service(
+            uow=self.uow, id=999, username=self.user.username)
+        self.assertEqual(result, expected)
 
     def test_deactivate_event_service_should_return_error_when_user_is_not_author(self):
-        pass
+        another_user = self.uow.user.create(
+            username="another_user", password="test")
+        self.uow.event.create(**{
+            "name": "test_event",
+            "image": 'test_image',
+            "location": 'Almaty',
+            "location_url": 'https://www.google.com',
+            "description": 'Test description',
+            "full_description": 'Test full description',
+            "start_date": '2020-01-01',
+            "end_date": '2020-01-02',
+            "author": another_user,
+            "tags": ['test_tag1', 'test_tag2'],
+        })
+        expected = Result(
+            data=None, error=exceptions.UserIsNotEventAuthorException)
+        result = services.deactivate_event_service(
+            uow=self.uow, id=1, username=self.user.username)
+        self.assertEqual(result, expected)

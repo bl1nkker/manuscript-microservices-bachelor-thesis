@@ -94,6 +94,7 @@ class EventRepository(AbstractEventRepository):
         event = models.Event.objects.get(id=id)
         event.is_active = False
         event.save()
+        return models.Event.objects.get(id=id)
 
 
 class FakeEventRepository(AbstractEventRepository):

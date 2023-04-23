@@ -22,6 +22,7 @@ def handle_user_creation(ch, method, properties, body):
     import django
     django.setup()
     import app.models as models
+    print('Handling user creation...')
     user = models.User.objects.create(
         username=data['username'],
         email=data['email'],
@@ -32,6 +33,7 @@ def handle_user_creation(ch, method, properties, body):
         id=data['id'],
         user=user
     )
+    print('User created!')
 
 
 if __name__ == '__main__':

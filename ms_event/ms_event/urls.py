@@ -18,5 +18,7 @@ from django.urls import path
 import app.views as views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('create/', views.create_event, name='create_event'),
+    # path('create/', views.create_event, name='create_event'),
+    path('events/<int:event_id>', views.event, name='get_event'),
+    path('events/', views.events, name='events'),
 ]

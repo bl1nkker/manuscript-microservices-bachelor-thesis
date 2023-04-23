@@ -1,5 +1,8 @@
+import jwt
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 # Create your models here.
 
 
@@ -17,6 +20,14 @@ class ManuscriptUser(models.Model):
             'first_name': self.user.first_name,
             'last_name': self.user.last_name,
         }
+
+    def generate_jwt_token(self):
+        token = jwt.encode({
+            "id": self.id,
+            "email": self.user.email,
+        }, settings.SECRET_KEY, algorithm='HS256')
+
+        return token
 
 
 class Event(models.Model):
@@ -39,6 +50,11 @@ class Event(models.Model):
         return f'{self.name} ({self.type.name}): {self.start_date} - {self.end_date}'
 
     def to_dict(self):
+        start_date = self.start_date
+        end_date = self.end_date
+        if type(self.start_date) == datetime.date and type(self.start_date) == datetime.date:
+            start_date = self.start_date.strftime('%Y-%m-%d')
+            end_date = self.end_date.strftime('%Y-%m-%d')
         return {
             'id': self.id,
             'name': self.name,
@@ -47,8 +63,8 @@ class Event(models.Model):
             'location_url': self.location_url,
             'description': self.description,
             'full_description': self.full_description,
-            'start_date': self.start_date,
-            'end_date': self.end_date,
+            'start_date': start_date,
+            'end_date': end_date,
             'author': self.author.to_dict(),
             'tags': self.tags,
             'is_active': self.is_active,

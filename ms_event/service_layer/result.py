@@ -13,7 +13,7 @@ class Result():
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, Result):
-            return self.data == __o.data and type(self.error) == type(__o.error)
+            return self.data == __o.data and self.error == __o.error
         return False
 
     def __hash__(self) -> int:
@@ -24,3 +24,9 @@ class Result():
 
     def __repr__(self) -> str:
         return f"Result(data={self.data}, error={self.error})"
+
+    def to_response(self):
+        return {
+            "data": self.data,
+            "error": self.error.message if self.error else None
+        }

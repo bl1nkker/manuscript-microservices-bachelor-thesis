@@ -21,6 +21,20 @@ class AbstractUserRepository(abc.ABC):
         '''
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def create(self, **kwargs):
+        '''
+        Создает [User] и возвращает его
+
+                Args:
+                        id: [int] - id пользователя
+                        username: [str] - username пользователя
+                        password: [str] - password пользователя (по умолчанию 'dsadsadas')
+
+                Returns:
+                        [Student] - созданный студент
+        '''
+
 
 class ManuscriptUserRepository(AbstractUserRepository):
 
@@ -30,6 +44,10 @@ class ManuscriptUserRepository(AbstractUserRepository):
         user = models.User.objects.filter(**kwargs).first()
         return models.ManuscriptUser.objects.filter(user=user).first()
 
+    def create(self, **kwargs):
+        user = models.User.objects.create(**kwargs)
+        return models.ManuscriptUser.objects.create(user=user)
+
 
 class FakeManuscriptUserRepository(AbstractUserRepository):
 
@@ -37,7 +55,7 @@ class FakeManuscriptUserRepository(AbstractUserRepository):
         self._id = 1
         self._users = []
 
-    def get(self, **kwargs) -> Union[models.ManuscriptUser, None]:
+    def get(self, **kwargs) -> Union[fake_models.ManuscriptUser, None]:
         return next((user for user in self._users if all([
             getattr(user, key) == value for key, value in kwargs.items()
         ])), None)

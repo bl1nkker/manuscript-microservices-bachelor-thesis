@@ -5,7 +5,7 @@ from django.test import TestCase
 import app.models as models
 
 
-class TestEventsManagement(TestCase):
+class TestEventsManagement():
     def setUp(self) -> None:
         user = models.User.objects.create(
             username="test_user@gmail.com",

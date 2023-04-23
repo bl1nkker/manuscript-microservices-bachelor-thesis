@@ -20,9 +20,9 @@ def sign_up_user_service(uow: uow.AbstractUnitOfWork, request, username: str, fi
         user = uow.user.create(username=username, first_name=first_name,
                                last_name=last_name, password=password, email=username)
     try:
-        handle_publish_message_on_user_created()
-    except:
-        pass
+        handle_publish_message_on_user_created(user=user)
+    except Exception as e:
+        print('Error while publishing message: ', e)
     return Result(data={"access_token": user.generate_jwt_token()})
 
 
@@ -48,6 +48,8 @@ def handle_publish_message_on_user_created(user):
     credentials = pika.URLParameters(settings.RABBITMQ_CONNECTION_URL)
     message_broker = mb.RabbitMQ(
         credentials.host, credentials.port, credentials.credentials.username, credentials.credentials.password, exchange=settings.RABBITMQ_EXCHANGE_NAME)
+    print('Connecting to message broker...')
     with message_broker:
+        print('Publishing message...')
         message_broker.publish(
             message=json.dumps(user.to_dict()), routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)

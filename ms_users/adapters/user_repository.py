@@ -79,7 +79,7 @@ class FakeManuscriptUserRepository(AbstractUserRepository):
         self._id = 1
         self._users = []
 
-    def get(self, **kwargs) -> Union[models.ManuscriptUser, None]:
+    def get(self, **kwargs) -> Union[fake_models.ManuscriptUser, None]:
         return next((user for user in self._users if all([
             getattr(user, key) == value for key, value in kwargs.items()
         ])), None)

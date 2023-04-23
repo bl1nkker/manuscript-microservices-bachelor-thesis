@@ -6,12 +6,14 @@ name = "pypi"
 [packages]
 django = "*"
 gunicorn = "*"
+djangorestframework-simplejwt = "*"
 pyyaml = "*"
 psycopg2-binary = "*"
 pillow = "*"
 pika = "*"
 tenacity = "*"
 pytest-django = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
