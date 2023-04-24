@@ -4,6 +4,7 @@ import service_layer.message_broker as mb
 import service_layer.unit_of_work as uow
 from service_layer.result import Result
 import core.exceptions as exceptions
+import core.logger as logger
 
 
 def get_event_service(uow: uow.AbstractUnitOfWork, id: int):
@@ -59,23 +60,35 @@ def deactivate_event_service(uow: uow.AbstractUnitOfWork, id: int, username: str
 
 
 def handle_publish_message_on_event_created(data):
-    if settings.DEBUG:
-        message_broker = mb.RabbitMQ(
-            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
-    else:
-        message_broker = mb.RabbitMQ()
-    with message_broker:
-        message_broker.publish(
-            message=json.dumps(data), routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY)
+    try:
+        if settings.DEBUG:
+            message_broker = mb.RabbitMQ(
+                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        else:
+            message_broker = mb.RabbitMQ()
+        with message_broker:
+            message_broker.publish(
+                message=json.dumps(data), routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY)
+        logger.info(user='PUBLISHER',
+                    message=f'Data({data}) sent to {settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY}', logger=logger.mb_logger)
+    except Exception as e:
+        logger.error(
+            user='PUBLISHER', message=f'Error while publishing message on event created: {e}', logger=logger.mb_logger)
 
 
 def handle_publish_message_on_event_edited(data):
-    if settings.DEBUG:
-        message_broker = mb.RabbitMQ(
-            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
-    else:
-        message_broker = mb.RabbitMQ()
+    try:
+        if settings.DEBUG:
+            message_broker = mb.RabbitMQ(
+                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        else:
+            message_broker = mb.RabbitMQ()
 
-    with message_broker:
-        message_broker.publish(
-            message=json.dumps(data), routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
+        with message_broker:
+            message_broker.publish(
+                message=json.dumps(data), routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
+        logger.info(user='PUBLISHER',
+                    message=f'Data({data}) sent to {settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY}', logger=logger.mb_logger)
+    except Exception as e:
+        logger.error(
+            user='PUBLISHER', message=f'Error while publishing message on event edited: {e}', logger=logger.mb_logger)

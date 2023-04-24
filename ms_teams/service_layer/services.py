@@ -4,6 +4,7 @@ import service_layer.message_broker as mb
 import service_layer.unit_of_work as uow
 from service_layer.result import Result
 import core.exceptions as exceptions
+import core.logger as logger
 
 
 def create_team_service(uow: uow.AbstractUnitOfWork, username: str, event_id: int, **kwargs):
@@ -74,14 +75,20 @@ def kick_team_member_service(uow: uow.AbstractUnitOfWork, username: str, team_id
 
 
 def handle_publish_message_on_user_kicked(user, team):
-    if settings.DEBUG:
-        message_broker = mb.RabbitMQ(
-            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
-    else:
-        message_broker = mb.RabbitMQ()
-    with message_broker:
-        message_broker.publish(
-            message=json.dumps({
-                "user": user,
-                "team": team,
-            }), routing_key=settings.RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY)
+    try:
+        if settings.DEBUG:
+            message_broker = mb.RabbitMQ(
+                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        else:
+            message_broker = mb.RabbitMQ()
+        with message_broker:
+            message_broker.publish(
+                message=json.dumps({
+                    "user": user,
+                    "team": team,
+                }), routing_key=settings.RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY)
+        logger.info(user='PUBLISHER',
+                    message=f'Data({user} - {team}) sent to {settings.RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY}', logger=logger.mb_logger)
+    except Exception as e:
+        logger.error(
+            user='PUBLISHER', message=f'Error while publishing message on user {user} kicked from {team}: {e}', logger=logger.mb_logger)

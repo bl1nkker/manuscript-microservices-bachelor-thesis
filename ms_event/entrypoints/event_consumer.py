@@ -3,16 +3,24 @@ from django.conf import settings
 import pika
 import json
 import os
+import core.logger as logger
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_event.settings'
 
 
 def start(message_broker):
-    print('Starting event consumer...')
-
-    with message_broker:
-        message_broker.subscribe(
-            queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
-        message_broker.start_consuming()
+    logger.info(user='CONSUMER',
+                message='Starting message broker connection...', logger=logger.mb_logger)
+    try:
+        with message_broker:
+            message_broker.subscribe(
+                queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
+            message_broker.start_consuming()
+    except Exception as e:
+        logger.error(user='CONSUMER',
+                     message=f'Error while consuming message: {e}', logger=logger.mb_logger)
+    finally:
+        logger.info(user='CONSUMER',
+                    message='Closing message broker connection...', logger=logger.mb_logger)
 
 
 def handle_user_creation(ch, method, properties, body):

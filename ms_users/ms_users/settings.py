@@ -170,6 +170,35 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'app': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': "app_debug.log",
+        },
+        'rabbitmq': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': "rabbitmq_debug.log",
+        },
+    },
+    'loggers': {
+        'manuscript': {
+            'handlers': ['app'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'rabbitmq': {
+            'handlers': ['rabbitmq'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

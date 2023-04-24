@@ -36,7 +36,7 @@ class TestAuthentication(TestCase):
             "/signin/", data=body)
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
-        self.assertIsNotNone(content['access_token'])
+        self.assertIsNotNone(content['data']['access_token'])
 
     def test_user_sign_in_should_return_error_when_password_is_incorrect(self):
         create_user(username="test@gmail.com", password="testpassword",
@@ -49,7 +49,7 @@ class TestAuthentication(TestCase):
             "/signin/", data=body)
         self.assertEqual(response.status_code, 401)
         content = json.loads(response.content)
-        self.assertEqual(content['message'],
+        self.assertEqual(content['error'],
                          exceptions.AUTHENTICATION_EXCEPTION_MESSAGE)
 
     def test_user_sign_in_should_return_error_when_user_is_not_found(self):
@@ -61,7 +61,7 @@ class TestAuthentication(TestCase):
             "/signin/", data=body)
         self.assertEqual(response.status_code, 401)
         content = json.loads(response.content)
-        self.assertEqual(content['message'],
+        self.assertEqual(content['error'],
                          exceptions.AUTHENTICATION_EXCEPTION_MESSAGE)
 
     def test_sign_up_should_return_result_token(self):
@@ -76,7 +76,7 @@ class TestAuthentication(TestCase):
             "/signup/", data=body)
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
-        self.assertIsNotNone(content['access_token'])
+        self.assertIsNotNone(content['data']['access_token'])
 
     def test_sign_up_should_return_error_when_validation_error_occured(self):
         body = {

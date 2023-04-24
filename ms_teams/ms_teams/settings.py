@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-b9807p5++2ky()v7r1eyowt&21pcs6s-n@73_5cw$g+t4z3co('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -165,6 +165,35 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'app': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': "app_debug.log",
+        },
+        'rabbitmq': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': "rabbitmq_debug.log",
+        },
+    },
+    'loggers': {
+        'manuscript': {
+            'handlers': ['app'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'rabbitmq': {
+            'handlers': ['rabbitmq'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 
 # Internationalization
