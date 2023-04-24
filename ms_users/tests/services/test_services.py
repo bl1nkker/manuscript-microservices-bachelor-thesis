@@ -1,12 +1,15 @@
-from django.test import TransactionTestCase
-from unittest.mock import patch
-import app.models as models
-import services.unit_of_work as uow
-import services.services as services
+import json
+from django.test import TransactionTestCase, TestCase, override_settings
+from django.conf import settings
+
+import service_layer.unit_of_work as uow
+import service_layer.services as services
 import core.exceptions as exceptions
-from services import Result
+from service_layer import Result
+import service_layer.message_broker as mb
 
 
+@override_settings(DEBUG=True)
 class TestUserServices(TransactionTestCase):
     def setUp(self) -> None:
         self.uow = uow.FakeUnitOfWork()
@@ -70,3 +73,29 @@ class TestUserServices(TransactionTestCase):
         expected = Result(data=user.to_dict(), error=None)
         result = services.get_me_service(uow=self.uow, user=user)
         self.assertEqual(expected, result)
+
+
+@override_settings(DEBUG=True)
+class TestMessageBrokerServices(TestCase):
+    def setUp(self) -> None:
+        self.uow = uow.FakeUnitOfWork()
+        return super().setUp()
+
+    def test_create_user_service_should_publish_message_on_success(self):
+        q = 'test.user.services.create.q'
+        message_broker = mb.RabbitMQ(
+            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        with message_broker:
+            message_broker.channel.queue_declare(
+                queue=q, durable=True, exclusive=True)
+            message_broker.channel.queue_bind(exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
+                                              queue=q, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
+
+            expected = Result(data={"access_token": 'test_token'}, error=None)
+            result = services.sign_up_user_service(
+                uow=self.uow, request=None, username="test", password="test", confirm_password="test", first_name="test", last_name="user")
+            self.assertEqual(expected, result)
+            method, properties, body = message_broker.channel.basic_get(
+                queue=q, auto_ack=True)
+            user = self.uow.user.get(username="test")
+            self.assertEqual(json.loads(body), user.to_dict())

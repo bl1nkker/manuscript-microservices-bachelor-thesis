@@ -3,8 +3,8 @@ import json
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-import services.services as services
-import services.unit_of_work as uow
+import service_layer.services as services
+import service_layer.unit_of_work as uow
 import core.exceptions as exceptions
 
 

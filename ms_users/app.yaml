@@ -27,3 +27,6 @@ RABBITMQ_PASSWORD: manuscript # default RabbitMQ password
 RABBITMQ_EXCHANGE_NAME: manuscript.services # default RabbitMQ exchange name
 RABBITMQ_QUEUE: users_queue
 RABBITMQ_USER_CREATE_ROUTING_KEY: user.created
+
+RABBITMQ_TEST_EXCHANGE_NAME: manuscript.services.test # default RabbitMQ exchange name
+RABBITMQ_TEST_QUEUE: user_queue

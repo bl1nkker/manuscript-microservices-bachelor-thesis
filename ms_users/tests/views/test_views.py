@@ -1,8 +1,8 @@
 import json
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 
-import services.unit_of_work as uow
+import service_layer.unit_of_work as uow
 import core.exceptions as exceptions
 # import app.core.failures_messages as failure_messages
 
@@ -20,6 +20,7 @@ def create_user(username="test@gmail.com", password="testpassword", first_name="
         return user
 
 
+@override_settings(DEBUG=True)
 class TestAuthentication(TestCase):
     def setUp(self):
         self.client = Client()

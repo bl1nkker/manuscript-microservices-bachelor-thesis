@@ -2,7 +2,7 @@ from django.test import TransactionTestCase
 from django.contrib.auth import authenticate
 
 import app.models as models
-import services.unit_of_work as uow
+import service_layer.unit_of_work as uow
 
 
 class TestDjangoORMUnitOfWork(TransactionTestCase):
