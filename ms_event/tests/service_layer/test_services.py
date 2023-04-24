@@ -1,11 +1,17 @@
-from django.test import TestCase
+import json
 
+from django.test import TestCase, override_settings
+from django.conf import settings
+
+from unittest.mock import patch, Mock
 from service_layer.result import Result
 import service_layer.services as services
 import service_layer.unit_of_work as uow
+import service_layer.message_broker as mb
 import core.exceptions as exceptions
 
 
+@override_settings(DEBUG=True)
 class TestEventServices(TestCase):
 
     def setUp(self) -> None:
@@ -222,10 +228,11 @@ class TestEventServices(TestCase):
             "tags": ['test_tag1', 'test_tag2'],
         })
         self.assertEqual(result, expected)
+
     # Edit event
 
     def test_edit_event_service_should_return_event(self):
-        event = self.uow.event.create(**{
+        self.uow.event.create(**{
             "name": "test_event",
             "image": 'test_image',
             "location": 'Almaty',
@@ -398,3 +405,141 @@ class TestEventServices(TestCase):
         result = services.deactivate_event_service(
             uow=self.uow, id=1, username=self.user.username)
         self.assertEqual(result, expected)
+
+
+@override_settings(DEBUG=True)
+class TestMessageBrokerServices(TestCase):
+    def setUp(self) -> None:
+        self.uow = uow.FakeUnitOfWork()
+        self.user = self.uow.user.create(username="test", password="test")
+        return super().setUp()
+
+    def test_create_event_service_should_publish_message_on_success(self):
+        q = 'test.services.create.q'
+        message_broker = mb.RabbitMQ(
+            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        with message_broker:
+            message_broker.channel.queue_declare(
+                queue=q, durable=True, exclusive=True)
+            message_broker.channel.queue_bind(exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
+                                              queue=q, routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY)
+            message = {
+                "id": 1,
+                "name": "test_event",
+                "image": 'test_image',
+                "location": 'Almaty',
+                "location_url": 'https://www.google.com',
+                "description": 'Test description',
+                "full_description": 'Test full description',
+                "start_date": '2020-01-01',
+                "end_date": '2020-01-02',
+                "author": self.user.to_dict(),
+                "tags": ['test_tag1', 'test_tag2'],
+                "is_active": True,
+            }
+            services.create_event_service(uow=self.uow, username=self.user.username, **{
+                "name": "test_event",
+                "image": 'test_image',
+                "location": 'Almaty',
+                "location_url": 'https://www.google.com',
+                "description": 'Test description',
+                "full_description": 'Test full description',
+                "start_date": '2020-01-01',
+                "end_date": '2020-01-02',
+                "tags": ['test_tag1', 'test_tag2'],
+            })
+            method, properties, body = message_broker.channel.basic_get(
+                queue=q, auto_ack=True)
+            self.assertEqual(json.loads(body), message)
+
+    def test_edit_event_service_should_publish_message_on_success(self):
+        q = 'test.services.edit.q'
+        message_broker = mb.RabbitMQ(
+            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        with message_broker:
+            message_broker.channel.queue_declare(
+                queue=q, durable=True, exclusive=True)
+            message_broker.channel.queue_bind(exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
+                                              queue=q, routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
+            self.uow.event.create(**{
+                "name": "test_event",
+                "image": 'test_image',
+                "location": 'Almaty',
+                "location_url": 'https://www.google.com',
+                "description": 'Test description',
+                "full_description": 'Test full description',
+                "start_date": '2020-01-01',
+                "end_date": '2020-01-02',
+                "author": self.user,
+                "tags": ['test_tag1', 'test_tag2'],
+            })
+            message = {
+                "id": 1,
+                "name": "test_event updated",
+                "image": 'test_image',
+                "location": 'Almaty',
+                "location_url": 'https://www.google.com',
+                "description": 'Test description',
+                "full_description": 'Test full description',
+                "start_date": '2020-11-01',
+                "end_date": '2020-11-02',
+                "author": self.user.to_dict(),
+                "tags": ['test_tag1', 'test_tag2'],
+                "is_active": True,
+            }
+            services.edit_event_service(uow=self.uow, id=1, username=self.user.username, **{
+                "name": "test_event updated",
+                "image": 'test_image',
+                "location": 'Almaty',
+                "location_url": 'https://www.google.com',
+                "description": 'Test description',
+                "full_description": 'Test full description',
+                "start_date": '2020-11-01',
+                "end_date": '2020-11-02',
+                "author": self.user,
+                "tags": ['test_tag1', 'test_tag2'],
+            })
+            method, properties, body = message_broker.channel.basic_get(
+                queue=q, auto_ack=True)
+            self.assertEqual(json.loads(body), message)
+
+    def test_deactivate_event_service_should_publish_message_on_success(self):
+        q = 'test.services.deactivate.q'
+        message_broker = mb.RabbitMQ(
+            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        with message_broker:
+            message_broker.channel.queue_declare(
+                queue=q, durable=True, exclusive=True)
+            message_broker.channel.queue_bind(exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
+                                              queue=q, routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
+            self.uow.event.create(**{
+                "name": "test_event",
+                "image": 'test_image',
+                "location": 'Almaty',
+                "location_url": 'https://www.google.com',
+                "description": 'Test description',
+                "full_description": 'Test full description',
+                "start_date": '2020-01-01',
+                "end_date": '2020-01-02',
+                "author": self.user,
+                "tags": ['test_tag1', 'test_tag2'],
+            })
+            message = {
+                "id": 1,
+                "name": "test_event",
+                "image": 'test_image',
+                "location": 'Almaty',
+                "location_url": 'https://www.google.com',
+                "description": 'Test description',
+                "full_description": 'Test full description',
+                "start_date": '2020-01-01',
+                "end_date": '2020-01-02',
+                "author": self.user.to_dict(),
+                "tags": ['test_tag1', 'test_tag2'],
+                "is_active": False,
+            }
+            services.deactivate_event_service(
+                uow=self.uow, id=1, username=self.user.username)
+            method, properties, body = message_broker.channel.basic_get(
+                queue=q, auto_ack=True)
+            self.assertEqual(json.loads(body), message)

@@ -2,9 +2,12 @@
 
 import pika
 from abc import ABC, abstractmethod
+import os
+from django.conf import settings
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_event.settings'
 
 
-class MessageBroker(ABC):
+class AbstractMessageBroker(ABC):
     @abstractmethod
     def connect(self):
         pass
@@ -22,9 +25,10 @@ class MessageBroker(ABC):
         pass
 
 
-class RabbitMQ(MessageBroker):
+class RabbitMQ(AbstractMessageBroker):
 
-    def __init__(self, host, port, username, password, exchange):
+    def __init__(self, host: str = settings.RABBITMQ_HOST, port: str = settings.RABBITMQ_PORT, username: str = settings.RABBITMQ_USER,
+                 password: str = settings.RABBITMQ_PASSWORD, exchange: str = settings.RABBITMQ_EXCHANGE_NAME, exchange_type='topic'):
         self.host = host
         self.port = port
         self.username = username
@@ -34,7 +38,7 @@ class RabbitMQ(MessageBroker):
         self.connection = None
         self.channel = None
 
-        self.exchange_type = 'topic'
+        self.exchange_type = exchange_type
 
     def __enter__(self):
         self.connect()
@@ -42,8 +46,6 @@ class RabbitMQ(MessageBroker):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.disconnect()
-        self.connection = None
-        self.channel = None
 
     def connect(self):
         credentials = pika.credentials.PlainCredentials(
@@ -66,8 +68,15 @@ class RabbitMQ(MessageBroker):
             exchange=self.exchange, queue=queue_name, routing_key=routing_key)
         self.channel.basic_consume(
             queue=queue_name, on_message_callback=callback, auto_ack=True)
+
+    def start_consuming(self):
         self.channel.start_consuming()
 
     def disconnect(self):
         self.channel.close()
         self.connection.close()
+
+    def consume_last_message(self, queue):
+        method, properties, body = self.channel.basic_get(
+            queue=queue, auto_ack=True)
+        return body

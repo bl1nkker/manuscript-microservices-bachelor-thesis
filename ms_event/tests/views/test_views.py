@@ -47,7 +47,7 @@ def create_event(user, name="test_event", location='Almaty', tags=['test_tag1', 
         return event
 
 
-@override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
+@override_settings(MEDIA_ROOT=(TEST_DIR + '/media'), DEBUG=True)
 class TestEventManagement(TransactionTestCase):
     reset_sequences = True
 

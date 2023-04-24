@@ -35,8 +35,6 @@ PORTS:
 
 TODO:
 
-- set views for teams
-- write documentation for events
 - refactor message broker
 
 - think about notification service
