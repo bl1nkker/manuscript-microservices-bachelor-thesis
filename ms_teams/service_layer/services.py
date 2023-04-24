@@ -1,3 +1,6 @@
+import json
+from django.conf import settings
+import service_layer.message_broker as mb
 import service_layer.unit_of_work as uow
 from service_layer.result import Result
 import core.exceptions as exceptions
@@ -71,13 +74,11 @@ def kick_team_member_service(uow: uow.AbstractUnitOfWork, username: str, team_id
 
 
 def handle_publish_message_on_user_kicked(user, team):
-    import pika
-    import json
-    from django.conf import settings
-    import service_layer.message_broker as mb
-    credentials = pika.URLParameters(settings.RABBITMQ_CONNECTION_URL)
-    message_broker = mb.RabbitMQ(
-        credentials.host, credentials.port, credentials.credentials.username, credentials.credentials.password, exchange=settings.RABBITMQ_EXCHANGE_NAME)
+    if settings.DEBUG:
+        message_broker = mb.RabbitMQ(
+            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+    else:
+        message_broker = mb.RabbitMQ()
     with message_broker:
         message_broker.publish(
             message=json.dumps({

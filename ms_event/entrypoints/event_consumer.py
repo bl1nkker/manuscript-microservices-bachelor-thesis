@@ -12,8 +12,6 @@ def start(message_broker):
     with message_broker:
         message_broker.subscribe(
             queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
-        message_broker.subscribe(
-            queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
         message_broker.start_consuming()
 
 

@@ -6,15 +6,14 @@ import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_teams.settings'
 
 
-def start():
-    print('Starting event consumer...')
-    credentials = pika.URLParameters(settings.RABBITMQ_CONNECTION_URL)
-    message_broker = mb.RabbitMQ(
-        credentials.host, credentials.port, credentials.credentials.username, credentials.credentials.password, exchange=settings.RABBITMQ_EXCHANGE_NAME)
-    message_broker.connect()
-
+def start(message_broker):
     message_broker.subscribe(
         queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
+    message_broker.subscribe(
+        queue=settings.RABBITMQ_QUEUE, callback=handle_event_creation, routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY)
+    message_broker.subscribe(
+        queue=settings.RABBITMQ_QUEUE, callback=handle_event_edit, routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
+    message_broker.start_consuming()
 
 
 def handle_user_creation(ch, method, properties, body):
@@ -34,5 +33,29 @@ def handle_user_creation(ch, method, properties, body):
     )
 
 
+def handle_event_creation(ch, method, properties, body):
+    data = json.loads(body)
+    import django
+    django.setup()
+    import app.models as models
+    models.Event.objects.create(
+        name=data['name'],
+        id=data['id'],
+        is_active=data['is_active'],
+    )
+
+
+def handle_event_edit(ch, method, properties, body):
+    data = json.loads(body)
+    import django
+    django.setup()
+    import app.models as models
+    event = models.Event.objects.get(id=data['id'])
+    event.name = data['name']
+    event.is_active = data['is_active']
+    event.save()
+
+
 if __name__ == '__main__':
-    start()
+    message_broker = mb.RabbitMQ()
+    start(message_broker=message_broker)
