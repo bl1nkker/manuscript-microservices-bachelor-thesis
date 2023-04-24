@@ -27,6 +27,8 @@ def start(message_broker):
 
 
 def handle_user_creation(ch, method, properties, body):
+    logger.info(user='CONSUMER',
+                message=f'Handle user creation with body: {body}', logger=logger.mb_logger)
     data = json.loads(body)
     import django
     django.setup()
@@ -41,29 +43,47 @@ def handle_user_creation(ch, method, properties, body):
         id=data['id'],
         user=user
     )
+    logger.info(user='CONSUMER',
+                message=f'User created: {user}', logger=logger.mb_logger)
 
 
 def handle_event_creation(ch, method, properties, body):
-    data = json.loads(body)
-    import django
-    django.setup()
-    import app.models as models
-    models.Event.objects.create(
-        name=data['name'],
-        id=data['id'],
-        is_active=data['is_active'],
-    )
+    logger.info(user='CONSUMER',
+                message=f'Handle event creation with body: {body}', logger=logger.mb_logger)
+    try:
+        data = json.loads(body)
+        import django
+        django.setup()
+        import app.models as models
+        models.Event.objects.create(
+            name=data['name'],
+            id=data['id'],
+            is_active=data['is_active'],
+        )
+        logger.info(user='CONSUMER',
+                    message=f'Event created: {data}', logger=logger.mb_logger)
+    except Exception as e:
+        logger.error(user='CONSUMER',
+                     message=f'Error while handling event creation: {e}', logger=logger.mb_logger)
 
 
 def handle_event_edit(ch, method, properties, body):
-    data = json.loads(body)
-    import django
-    django.setup()
-    import app.models as models
-    event = models.Event.objects.get(id=data['id'])
-    event.name = data['name']
-    event.is_active = data['is_active']
-    event.save()
+    logger.info(user='CONSUMER',
+                message=f'Handle event edit with body: {body}', logger=logger.mb_logger)
+    try:
+        data = json.loads(body)
+        import django
+        django.setup()
+        import app.models as models
+        event = models.Event.objects.get(id=data['id'])
+        event.name = data['name']
+        event.is_active = data['is_active']
+        event.save()
+        logger.info(user='CONSUMER',
+                    message=f'Event edited: {data}', logger=logger.mb_logger)
+    except Exception as e:
+        logger.error(user='CONSUMER',
+                     message=f'Error while handling event edit: {e}', logger=logger.mb_logger)
 
 
 if __name__ == '__main__':

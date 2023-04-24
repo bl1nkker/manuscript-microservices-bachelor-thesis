@@ -24,21 +24,29 @@ def start(message_broker):
 
 
 def handle_user_creation(ch, method, properties, body):
-    import django
-    django.setup()
-    import app.models as models
+    logger.info(user='CONSUMER',
+                message=f'Handle user creation with body: {body}', logger=logger.mb_logger)
+    try:
+        import django
+        django.setup()
+        import app.models as models
 
-    data = json.loads(body)
-    user = models.User.objects.create(
-        username=data['username'],
-        email=data['email'],
-        first_name=data['first_name'],
-        last_name=data['last_name'],
-    )
-    models.ManuscriptUser.objects.create(
-        id=data['id'],
-        user=user
-    )
+        data = json.loads(body)
+        user = models.User.objects.create(
+            username=data['username'],
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+        )
+        models.ManuscriptUser.objects.create(
+            id=data['id'],
+            user=user
+        )
+        logger.info(user='CONSUMER',
+                    message=f'User created: {user}', logger=logger.mb_logger)
+    except Exception as e:
+        logger.error(user='CONSUMER',
+                     message=f'Error while user creation: {e}', logger=logger.mb_logger)
 
 
 if __name__ == '__main__':
