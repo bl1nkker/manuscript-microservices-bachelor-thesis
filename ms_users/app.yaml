@@ -19,11 +19,11 @@ DB_POSTGRES_NAME: postgres
 REDIS_HOST: 127.0.0.1
 REDIS_DATABASE: 0
 
-RABBITMQ_HOST: localhost # or the hostname where RabbitMQ is running
-RABBITMQ_PORT: 5672 # default RabbitMQ port
-RABBITMQ_VHOST: # default virtual host
-RABBITMQ_USER: manuscript # default RabbitMQ username
-RABBITMQ_PASSWORD: manuscript # default RabbitMQ password
+RABBITMQ_HOST: cougar.rmq.cloudamqp.com
+RABBITMQ_PORT: 5672
+RABBITMQ_VHOST: gafsbpir
+RABBITMQ_USER: gafsbpir
+RABBITMQ_PASSWORD: nZ9zXTyLeXqx85E3wS2p_8nKvOFnxqBm
 RABBITMQ_EXCHANGE_NAME: manuscript.services # default RabbitMQ exchange name
 RABBITMQ_QUEUE: users_queue
 RABBITMQ_USER_CREATE_ROUTING_KEY: user.created

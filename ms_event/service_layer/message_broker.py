@@ -28,12 +28,14 @@ class AbstractMessageBroker(ABC):
 class RabbitMQ(AbstractMessageBroker):
 
     def __init__(self, host: str = settings.RABBITMQ_HOST, port: str = settings.RABBITMQ_PORT, username: str = settings.RABBITMQ_USER,
-                 password: str = settings.RABBITMQ_PASSWORD, exchange: str = settings.RABBITMQ_EXCHANGE_NAME, exchange_type='topic'):
+                 password: str = settings.RABBITMQ_PASSWORD, exchange: str = settings.RABBITMQ_EXCHANGE_NAME, vhost=settings.RABBITMQ_VHOST, exchange_type='topic'):
         self.host = host
         self.port = port
         self.username = username
         self.password = password
         self.exchange = exchange
+
+        self.vhost = vhost
 
         self.connection = None
         self.channel = None
@@ -51,7 +53,10 @@ class RabbitMQ(AbstractMessageBroker):
         credentials = pika.credentials.PlainCredentials(
             self.username, self.password)
         parameters = pika.ConnectionParameters(
-            host=self.host, port=self.port, credentials=credentials)
+            host=self.host, port=self.port, credentials=credentials, virtual_host=self.vhost)
+        if self.vhost == 'test':
+            parameters = pika.ConnectionParameters(
+                host=self.host, port=self.port, credentials=credentials)
         self.connection = pika.BlockingConnection(parameters)
         self.channel = self.connection.channel()
         self.channel.exchange_declare(
