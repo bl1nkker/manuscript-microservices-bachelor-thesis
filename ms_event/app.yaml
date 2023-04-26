@@ -1,11 +1,11 @@
 # Database settings
 DB_ENGINE: django.db.backends.postgresql
-DB_HOST: localhost
+DB_HOST: ms_event_db
 DB_PORT: 5432
 
-DB_USER: event
-DB_PASS: event
-DB_NAME: db_event
+DB_USER: postgres
+DB_PASS: postgres
+DB_NAME: postgres
 
 DB_TEST_USER: event_test
 DB_TEST_PASS: event_test

@@ -1,4 +1,3 @@
-import pika
 import json
 import service_layer.message_broker as mb
 from django.conf import settings
@@ -11,13 +10,14 @@ def start(message_broker):
     logger.info(user='CONSUMER',
                 message='Starting message broker connection...', logger=logger.mb_logger)
     try:
-        message_broker.subscribe(
-            queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
-        message_broker.subscribe(
-            queue=settings.RABBITMQ_QUEUE, callback=handle_event_creation, routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY)
-        message_broker.subscribe(
-            queue=settings.RABBITMQ_QUEUE, callback=handle_event_edit, routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
-        message_broker.start_consuming()
+        with message_broker:
+            message_broker.subscribe(
+                queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
+            message_broker.subscribe(
+                queue=settings.RABBITMQ_QUEUE, callback=handle_event_creation, routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY)
+            message_broker.subscribe(
+                queue=settings.RABBITMQ_QUEUE, callback=handle_event_edit, routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
+            message_broker.start_consuming()
     except Exception as e:
         logger.error(user='CONSUMER',
                      message=f'Error while consuming message: {e}', logger=logger.mb_logger)

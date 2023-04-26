@@ -35,10 +35,13 @@ PORTS:
 
 TODO:
 
-- refactor message broker
-
 - think about notification service
+- NGINX
+- kick/join team member
+- dashboards
+- k8s
 
-- logger
-- add message broker tests
-- check message broker
+if there are any processes:
+
+- lsof -i tcp:16010
+- sudo kill <process_id>

@@ -1,6 +1,5 @@
 import service_layer.message_broker as mb
 from django.conf import settings
-import pika
 import json
 import os
 import core.logger as logger

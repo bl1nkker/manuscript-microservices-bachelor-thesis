@@ -1,11 +1,11 @@
 # Database settings
 DB_ENGINE: django.db.backends.postgresql
-DB_HOST: localhost
+DB_HOST: ms_users_db
 DB_PORT: 5432
 
-DB_USER: users
-DB_PASS: users
-DB_NAME: db_users
+DB_USER: postgres
+DB_PASS: postgres
+DB_NAME: postgres
 
 DB_TEST_USER: users_test
 DB_TEST_PASS: users_test

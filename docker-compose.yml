@@ -1,0 +1,115 @@
+version: "3.8"
+
+services:
+  # Databases
+  ms_event_db:
+    image: postgres
+    container_name: ms_event_db
+    ports:
+      - "54321:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./event_postgres-data:/var/lib/postgresql/data
+
+  ms_teams_db:
+    image: postgres
+    container_name: ms_teams_db
+    ports:
+      - "54322:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./teams_postgres-data:/var/lib/postgresql/data
+
+  ms_users_db:
+    image: postgres
+    container_name: ms_users_db
+    ports:
+      - "54323:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./users_postgres-data:/var/lib/postgresql/data
+
+  # Web Apps
+  ms_event:
+    build: ./ms_event
+    container_name: ms_event
+    command: sh -c "python manage.py migrate && gunicorn ms_event.wsgi:application -c gunicorn.conf.py"
+    volumes:
+      - ./ms_event:/usr/src/app
+    ports:
+      - "16010:16010"
+    depends_on:
+      - ms_event_db
+    restart: always
+
+  ms_teams:
+    build: ./ms_teams
+    container_name: ms_teams
+    command: sh -c "python manage.py migrate && gunicorn ms_teams.wsgi:application -c gunicorn.conf.py"
+    volumes:
+      - ./ms_teams:/usr/src/app
+    ports:
+      - "16020:16020"
+    depends_on:
+      - ms_teams_db
+    restart: always
+
+  ms_users:
+    build: ./ms_users
+    container_name: ms_users
+    command: sh -c "python manage.py migrate && gunicorn ms_users.wsgi:application -c gunicorn.conf.py"
+    volumes:
+      - ./ms_users:/usr/src/app
+    ports:
+      - "16030:16030"
+    depends_on:
+      - ms_users_db
+    restart: always
+
+  # Consumers
+  ms_event_consumer:
+    build: ./ms_event
+    container_name: ms_event_consumer
+    command: sh -c "python -m entrypoints.event_consumer"
+    volumes:
+      - ./ms_event:/usr/src/app
+    depends_on:
+      - ms_event_db
+      - ms_event
+    restart: always
+
+  ms_teams_consumer:
+    build: ./ms_teams
+    container_name: ms_teams_consumer
+    command: sh -c "python -m entrypoints.event_consumer"
+    volumes:
+      - ./ms_teams:/usr/src/app
+    depends_on:
+      - ms_teams_db
+      - ms_teams
+    restart: always
+
+  ms_users_consumer:
+    build: ./ms_users
+    container_name: ms_users_consumer
+    command: sh -c "python -m entrypoints.event_consumer"
+    volumes:
+      - ./ms_users:/usr/src/app
+    depends_on:
+      - ms_users_db
+      - ms_users
+    restart: always
+
+volumes:
+  event_postgres-data:
+  users_postgres-data:
+  teams_postgres-data:

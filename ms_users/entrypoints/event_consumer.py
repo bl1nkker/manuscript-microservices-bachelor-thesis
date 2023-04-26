@@ -1,10 +1,7 @@
 import service_layer.message_broker as mb
-from django.conf import settings
-import pika
-import json
 import os
 import core.logger as logger
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_event.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_users.settings'
 
 
 def start(message_broker):

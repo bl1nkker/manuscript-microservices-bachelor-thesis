@@ -4,7 +4,7 @@ import pika
 from abc import ABC, abstractmethod
 import os
 from django.conf import settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_event.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_teams.settings'
 
 
 class AbstractMessageBroker(ABC):
@@ -34,6 +34,7 @@ class RabbitMQ(AbstractMessageBroker):
         self.username = username
         self.password = password
         self.exchange = exchange
+
         self.vhost = vhost
 
         self.connection = None
@@ -53,6 +54,9 @@ class RabbitMQ(AbstractMessageBroker):
             self.username, self.password)
         parameters = pika.ConnectionParameters(
             host=self.host, port=self.port, credentials=credentials, virtual_host=self.vhost)
+        if self.vhost == 'test':
+            parameters = pika.ConnectionParameters(
+                host=self.host, port=self.port, credentials=credentials)
         self.connection = pika.BlockingConnection(parameters)
         self.channel = self.connection.channel()
         self.channel.exchange_declare(
