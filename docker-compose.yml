@@ -109,6 +109,18 @@ services:
       - ms_users
     restart: always
 
+  # Proxy
+  nginx-proxy:
+    build: ./proxy
+    container_name: nginx-proxy
+    depends_on:
+      - ms_event
+      - ms_teams
+      - ms_users
+    ports:
+      - "80:80"
+      - "443:443"
+
 volumes:
   event_postgres-data:
   users_postgres-data:

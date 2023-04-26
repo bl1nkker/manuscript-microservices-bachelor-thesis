@@ -36,8 +36,9 @@ PORTS:
 TODO:
 
 - think about notification service
-- NGINX
 - kick/join team member
+- add images to response
+
 - dashboards
 - k8s
 
