@@ -25,7 +25,7 @@ def teams(request):
         else:
             logger.warning(
                 request.user, f"POST /teams FAIL: {result.to_response()}")
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
     elif request.method == 'GET':
         logger.info(request.user, "GET /teams")
         filter_params = {key: value
@@ -37,7 +37,7 @@ def teams(request):
         else:
             logger.warning(
                 request.user, f"GET /teams FAIL: {result.to_response()}")
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -68,7 +68,7 @@ def team(request, team_id: int):
         else:
             logger.warning(
                 request.user, f"PUT /teams/{team_id} FAIL {result.to_response()}")
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
     elif request.method == 'DELETE':
         logger.info(request.user, f"DELETE /teams/{team_id}")
         username = request.user.username
@@ -80,7 +80,7 @@ def team(request, team_id: int):
         else:
             logger.warning(
                 request.user, f"DELETE /teams/{team_id} FAIL {result.to_response()}")
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
 
 
 @api_view(['GET'])
@@ -94,4 +94,43 @@ def kick(request, team_id: int, member_id: int):
         if result.is_ok:
             return Response(result.to_response(), status=200)
         else:
-            return Response(result.to_response(), status=401)
+            return Response(result.to_response(), status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def team_participants(request, team_id: int):
+    uow = unit_of_work.DjangoORMUnitOfWork()
+    if request.method == 'POST':
+        logger.info(request.user, f"POST /teams/{team_id}/participants")
+        result = services.join_team_request_service(
+            uow, team_id=team_id, username=request.user.username)
+        if result.is_ok:
+            logger.info(
+                request.user, f"POST /teams/{team_id}/participants SUCCESS")
+            return Response(result.to_response(), status=201)
+        else:
+            logger.warning(
+                request.user, f"POST /teams/{team_id}/participants FAIL {result.to_response()}")
+            return Response(result.to_response(), status=400)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def team_participant(request, team_id: int, participant_id: int):
+    uow = unit_of_work.DjangoORMUnitOfWork()
+    if request.method == 'PUT':
+        logger.info(
+            request.user, f"PUT /teams/{team_id}/participants/{participant_id}")
+        username = request.user.username
+        status = request.data['status']
+        result = services.change_team_participation_service(
+            uow, username=username, team_id=team_id, participant_id=participant_id, status=status)
+        if result.is_ok:
+            logger.info(
+                request.user, f"PUT /teams/{team_id}/participants/{participant_id} SUCCESS")
+            return Response(result.to_response(), status=200)
+        else:
+            logger.warning(
+                request.user, f"PUT /teams/{team_id}/participants/{participant_id} FAIL {result.to_response()}")
+            return Response(result.to_response(), status=400)

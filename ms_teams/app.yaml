@@ -1,7 +1,7 @@
 # Database settings
 DB_ENGINE: django.db.backends.postgresql
-DB_HOST: ms_teams_db
-DB_PORT: 5432
+DB_HOST: 0.0.0.0
+DB_PORT: 54322
 
 DB_USER: postgres
 DB_PASS: postgres

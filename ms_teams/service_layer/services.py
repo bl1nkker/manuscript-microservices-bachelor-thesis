@@ -5,6 +5,7 @@ import service_layer.unit_of_work as uow
 from service_layer.result import Result
 import core.exceptions as exceptions
 import core.logger as logger
+import core.constants as constants
 
 
 def create_team_service(uow: uow.AbstractUnitOfWork, username: str, event_id: int, **kwargs):
@@ -14,9 +15,12 @@ def create_team_service(uow: uow.AbstractUnitOfWork, username: str, event_id: in
         event = uow.event.get(id=event_id)
         if event is None:
             return Result(data=None, error=exceptions.EventNotFoundException)
+        team = uow.team.create(event=event, **kwargs)
         user = uow.user.get(username=username)
-        team = uow.team.create(leader=user, event=event, **kwargs)
-        return Result(data=team.to_dict(), error=None)
+        uow.participant.create(
+            user=user, team=team, role=constants.LEADER_ROLE, status=constants.APPLIED_STATUS)
+        participants = uow.participant.list(team=team)
+        return Result(data={**team.to_dict(), "participants": [participant.to_dict() for participant in participants]}, error=None)
 
 
 def get_team_service(uow: uow.AbstractUnitOfWork, team_id: int):
@@ -24,7 +28,10 @@ def get_team_service(uow: uow.AbstractUnitOfWork, team_id: int):
         team = uow.team.get(id=team_id)
         if team is None:
             return Result(data=None, error=exceptions.TeamNotFoundException)
-        return Result(data=team.to_dict(), error=None)
+        participants = uow.participant.list(
+            team=team, status=constants.APPLIED_STATUS)
+        return Result(data={**team.to_dict(),
+                            "participants": [participant.to_dict() for participant in participants]}, error=None)
 
 
 def list_team_service(uow: uow.AbstractUnitOfWork, **kwargs):
@@ -40,10 +47,15 @@ def edit_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, 
         team = uow.team.get(id=team_id)
         if team is None:
             return Result(data=None, error=exceptions.TeamNotFoundException)
-        if team.leader.username != username:
+        user = uow.user.get(username=username)
+        leader = uow.participant.get(
+            user=user, team=team, role=constants.LEADER_ROLE)
+        if not leader or leader.user.username != username:
             return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
         team = uow.team.edit(id=team.id, **kwargs)
-        return Result(data=team.to_dict(), error=None)
+        participants = uow.participant.list(team=team)
+        return Result(data={**team.to_dict(),
+                            "participants": [participant.to_dict() for participant in participants]}, error=None)
 
 
 def deactivate_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int):
@@ -51,27 +63,69 @@ def deactivate_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id:
         team = uow.team.get(id=team_id)
         if team is None:
             return Result(data=None, error=exceptions.TeamNotFoundException)
-        if team.leader.username != username:
+        user = uow.user.get(username=username)
+        leader = uow.participant.get(
+            user=user, team=team, role=constants.LEADER_ROLE)
+        if not leader or leader.user.username != username:
             return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
         team = uow.team.deactivate(id=team.id)
-        return Result(data=team.to_dict(), error=None)
+        participants = uow.participant.list(team=team)
+        return Result(data={**team.to_dict(),
+                            "participants": [participant.to_dict() for participant in participants]}, error=None)
 
 
-def kick_team_member_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, member_id: int):
+def join_team_request_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int):
     with uow:
         team = uow.team.get(id=team_id)
         if team is None:
             return Result(data=None, error=exceptions.TeamNotFoundException)
-        if team.leader.username != username:
+        user = uow.user.get(username=username)
+        participant = uow.participant.get(user=user, team=team)
+        if participant:
+            return Result(data=None, error=exceptions.UserAlreadyHasParticipationException)
+        participant = uow.participant.create(
+            user=user, team=team, role=constants.MEMBER_ROLE, status=constants.PENDING_STATUS)
+        # Notify Message Broker
+        return Result(data=participant.to_dict(), error=None)
+
+
+def change_team_participation_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, participant_id: int, status: str):
+    with uow:
+        if status not in constants.PARTICIPANT_STATUSES:
+            return Result(data=None, error=exceptions.InvalidParticipantStatusException)
+        team = uow.team.get(id=team_id)
+        if team is None:
+            return Result(data=None, error=exceptions.TeamNotFoundException)
+        participant = uow.participant.get(id=participant_id)
+        if not participant:
+            return Result(data=None, error=exceptions.UserIsNotParticipantException)
+        if participant.status == status:
+            return Result(data=None, error=exceptions.ParticipantAlreadyHasStatusException)
+        user = uow.user.get(username=username)
+        leader = uow.participant.get(
+            user=user, team=team, role=constants.LEADER_ROLE)
+        if not leader:
             return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
-        updated_members = [
-            member for member in team.get_members() if member.id != member_id]
-        team = uow.team.edit(id=team.id, members=updated_members)
-        # try:
-        #     handle_publish_message_on_user_kicked(user=member_id, team=team.id)
-        # except Exception as e:
-        #     print('Error while publishing message', e)
-        return Result(data=team.to_dict(), error=None)
+        participant = uow.participant.edit(
+            id=participant.id, status=status)
+        # Notify Message Broker
+        return Result(data=participant.to_dict(), error=None)
+
+# def kick_team_member_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, member_id: int):
+#     with uow:
+#         team = uow.team.get(id=team_id)
+#         if team is None:
+#             return Result(data=None, error=exceptions.TeamNotFoundException)
+#         # if team.leader.username != username:
+#         #     return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
+#         updated_members = [
+#             member for member in team.get_members() if member.id != member_id]
+#         team = uow.team.edit(id=team.id, members=updated_members)
+#         # try:
+#         #     handle_publish_message_on_user_kicked(user=member_id, team=team.id)
+#         # except Exception as e:
+#         #     print('Error while publishing message', e)
+#         return Result(data=team.to_dict(), error=None)
 
 
 def handle_publish_message_on_user_kicked(user, team):

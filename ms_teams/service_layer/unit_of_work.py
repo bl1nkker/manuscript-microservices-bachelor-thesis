@@ -9,6 +9,7 @@ class AbstractUnitOfWork(abc.ABC):
     event: repository.AbstractEventRepository
     user: repository.AbstractUserRepository
     team: repository.AbstractTeamRepository
+    participant: repository.AbstractParticipantRepository
 
     def __enter__(self) -> AbstractUnitOfWork:
         return self
@@ -31,6 +32,7 @@ class DjangoORMUnitOfWork(AbstractUnitOfWork):
         self.event = repository.EventRepository()
         self.user = repository.ManuscriptUserRepository()
         self.team = repository.TeamRepository()
+        self.participant = repository.ParticipantRepository()
         return super().__enter__()
 
     def __exit__(self, *args):
@@ -48,6 +50,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
         self.event = repository.FakeEventRepository()
         self.user = repository.FakeManuscriptUserRepository()
         self.team = repository.FakeTeamRepository()
+        self.participant = repository.FakeParticipantRepository()
 
     def commit(self):
         self.committed = True

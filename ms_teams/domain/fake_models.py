@@ -32,13 +32,11 @@ class ManuscriptUser:
 
 
 class Team:
-    def __init__(self, name,  leader, event, is_active=True, members=[], id=None, image='',):
+    def __init__(self, name, event, is_active=True,  id=None, image='',):
         self.id = id
         self.name = name
         self.image = image
-        self.leader = leader
         self.event = event
-        self.members = members
         self.is_active = is_active
 
     def to_dict(self):
@@ -46,11 +44,27 @@ class Team:
             'id': self.id,
             'name': self.name,
             'image': self.image,
-            'leader': self.leader,
             'event': self.event,
-            'members': self.members,
             'is_active': self.is_active,
         }
 
     def get_members(self):
         return self.members
+
+
+class Participant:
+    def __init__(self, user, team, role, status, id=None):
+        self.id = id
+        self.user = user
+        self.team = team
+        self.role = role
+        self.status = status
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user': self.user.to_dict(),
+            'team': self.team.to_dict(),
+            'role': self.role,
+            'status': self.status,
+        }

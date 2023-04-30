@@ -3,6 +3,7 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+import core.constants as constants
 # Create your models here.
 
 
@@ -58,10 +59,7 @@ class Team(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField(
         upload_to='images/teams/', null=True, blank=True)
-    leader = models.ForeignKey(
-        ManuscriptUser, on_delete=models.CASCADE, blank=False, null=False, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
-    members = models.ManyToManyField(ManuscriptUser, related_name='members')
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
 
@@ -75,8 +73,27 @@ class Team(models.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'leader': self.leader.to_dict(),
-            'members': [member.to_dict() for member in self.members.all()],
             'event': self.event.to_dict(),
             'is_active': self.is_active,
+        }
+
+
+class Participant(models.Model):
+    user = models.ForeignKey(ManuscriptUser, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    role = models.CharField(
+        max_length=10, default=constants.MEMBER_ROLE)
+    status = models.CharField(
+        max_length=100, default=constants.PENDING_STATUS)
+
+    def __str__(self) -> str:
+        return f'{self.user} - {self.team}'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user': self.user.to_dict(),
+            'team': self.team.to_dict(),
+            'role': self.role,
+            'status': self.status,
         }
