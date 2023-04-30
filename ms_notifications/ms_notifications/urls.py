@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+import app.views as views
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('notifications/', views.notifications, name='notifications'),
+    path('notifications/<int:notification_id>/',
+         views.notification, name='notification'),
 ]

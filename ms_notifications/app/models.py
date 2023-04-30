@@ -42,3 +42,18 @@ class Notification(models.Model):
     status = models.CharField(max_length=20, default=constants.SUCCESS_TYPE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def to_dict(self):
+        created_at = self.created_at
+        updated_at = self.updated_at
+        if type(created_at) == datetime.datetime and type(updated_at) == datetime.datetime:
+            created_at = created_at.strftime('%Y-%m-%d')
+            updated_at = updated_at.strftime('%Y-%m-%d')
+        return {
+            'id': self.id,
+            'user': self.user.to_dict(),
+            'message': self.message,
+            'status': self.status,
+            'created_at': created_at,
+            'updated_at': updated_at,
+        }
