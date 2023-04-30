@@ -1,15 +1,17 @@
 # Database settings
 DB_ENGINE: django.db.backends.postgresql
-DB_HOST: ms_teams_db
-DB_PORT: 5432
+DB_HOST: 0.0.0.0
+DB_PORT: 54324
+# DB_HOST: ms_notifications_db
+# DB_PORT: 54324
 
 DB_USER: postgres
 DB_PASS: postgres
 DB_NAME: postgres
 
-DB_TEST_USER: teams_test
-DB_TEST_PASS: teams_test
-DB_TEST_NAME: db_teams_test
+DB_TEST_USER: notifications_test
+DB_TEST_PASS: notifications_test
+DB_TEST_NAME: db_notifications_test
 
 DB_POSTGRES_USER: postgres
 DB_POSTGRES_PASS: manuscript
@@ -34,7 +36,7 @@ RABBITMQ_TEST_USER: manuscript
 RABBITMQ_TEST_PASSWORD: manuscript
 RABBITMQ_TEST_EXCHANGE_NAME: manuscript.services.test # default RabbitMQ exchange name
 
-RABBITMQ_QUEUE: teams_queue
+RABBITMQ_QUEUE: notifications_queue
 
 RABBITMQ_USER_CREATE_ROUTING_KEY: user.created
 RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY: user.kicked
@@ -44,4 +46,4 @@ RABBITMQ_USER_LEFT_FROM_TEAM_ROUTING_KEY: team.user.left
 RABBITMQ_USER_JOIN_REQUEST_ROUTING_KEY: team.user.request.create
 RABBITMQ_USER_JOIN_REQUEST_UPDATED_ROUTING_KEY: team.user.request.update
 
-RABBITMQ_TEST_QUEUE: teams_queue
+RABBITMQ_TEST_QUEUE: test_notifications_queue

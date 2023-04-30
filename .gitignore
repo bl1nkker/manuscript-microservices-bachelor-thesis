@@ -1,2 +1,2 @@
 *.log
-*_postgres-data
+pg_data-*

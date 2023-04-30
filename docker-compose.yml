@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
     volumes:
-      - ./event_postgres-data:/var/lib/postgresql/data
+      - ./pg_data-event:/var/lib/postgresql/data
 
   ms_teams_db:
     image: postgres
@@ -24,7 +24,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
     volumes:
-      - ./teams_postgres-data:/var/lib/postgresql/data
+      - ./pg_data-teams:/var/lib/postgresql/data
 
   ms_users_db:
     image: postgres
@@ -36,7 +36,19 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=postgres
     volumes:
-      - ./users_postgres-data:/var/lib/postgresql/data
+      - ./pg_data-users/var/lib/postgresql/data
+
+  ms_notifications_db:
+    image: postgres
+    container_name: ms_notifications_db
+    ports:
+      - "54324:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./pg_data-notifications:/var/lib/postgresql/data
 
   # Web Apps
   ms_event:
@@ -121,7 +133,21 @@ services:
       - "80:80"
       - "443:443"
 
+  # For testing
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" # Expose port 5672 for AMQP
+      - "15672:15672" # Expose port 15672 for RabbitMQ management
+    environment:
+      - RABBITMQ_DEFAULT_USER=manuscript # Set RabbitMQ username
+      - RABBITMQ_DEFAULT_PASS=manuscript # Set RabbitMQ password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia # Mount a volume for persistent data
+
 volumes:
-  event_postgres-data:
-  users_postgres-data:
-  teams_postgres-data:
+  pg_data-event:
+  pg_data-users:
+  pg_data-teams:
+  pg_data-notifications:
+  rabbitmq_data:

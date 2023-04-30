@@ -32,6 +32,7 @@ PORTS:
 - 16010 - events
 - 16020 - teams
 - 16030 - users
+- 16040 - notifications
 
 TODO:
 
