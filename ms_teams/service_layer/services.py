@@ -85,7 +85,12 @@ def join_team_request_service(uow: uow.AbstractUnitOfWork, username: str, team_i
             return Result(data=None, error=exceptions.UserAlreadyHasParticipationException)
         participant = uow.participant.create(
             user=user, team=team, role=constants.MEMBER_ROLE, status=constants.PENDING_STATUS)
-        # Notify Message Broker
+        handle_publish_message_on_team_services(
+            data={
+                "user": user.to_dict(),
+                "team": team.to_dict(),
+                'action': 'join_request'
+            }, routing_key=settings.RABBITMQ_USER_JOIN_REQUEST_ROUTING_KEY)
         return Result(data=participant.to_dict(), error=None)
 
 
@@ -108,7 +113,12 @@ def change_team_participation_request_status_service(uow: uow.AbstractUnitOfWork
             return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
         participant = uow.participant.edit(
             id=participant.id, status=status)
-        # Notify Message Broker
+        handle_publish_message_on_team_services(
+            data={
+                "user": user.to_dict(),
+                "team": team.to_dict(),
+                'action': 'change_participant_status to {}'.format(status),
+            }, routing_key=settings.RABBITMQ_USER_JOIN_REQUEST_UPDATED_ROUTING_KEY)
         return Result(data=participant.to_dict(), error=None)
 
 
@@ -127,7 +137,12 @@ def kick_team_participant_service(uow: uow.AbstractUnitOfWork, username: str, te
             return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
         participant = uow.participant.edit(
             id=participant.id, status=constants.KICKED_STATUS)
-        # Notify Message Broker
+        handle_publish_message_on_team_services(
+            data={
+                "user": user.to_dict(),
+                "team": team.to_dict(),
+                'action': 'kick'
+            }, routing_key=settings.RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY)
         return Result(data=participant.to_dict(), error=None)
 
 
@@ -152,25 +167,33 @@ def leave_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int)
                     id=new_leader.id, role=constants.LEADER_ROLE)
             else:
                 team = uow.team.deactivate(id=team.id)
-        # Notify Message Broker
+        handle_publish_message_on_team_services(
+            data={
+                "user": user.to_dict(),
+                "team": team.to_dict(),
+                'action': 'leave'
+            }, routing_key=settings.RABBITMQ_USER_LEFT_FROM_TEAM_ROUTING_KEY)
         return Result(data=participant.to_dict(), error=None)
 
 
-def handle_publish_message_on_user_kicked(user, team):
+def handle_publish_message_on_team_services(data: dict, routing_key):
     try:
         if settings.DEBUG:
             message_broker = mb.RabbitMQ(
-                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+                host=settings.RABBITMQ_TEST_HOST,
+                port=settings.RABBITMQ_TEST_PORT,
+                username=settings.RABBITMQ_TEST_USER,
+                password=settings.RABBITMQ_TEST_PASSWORD,
+                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
+                vhost='test'
+            )
         else:
             message_broker = mb.RabbitMQ()
         with message_broker:
             message_broker.publish(
-                message=json.dumps({
-                    "user": user,
-                    "team": team,
-                }), routing_key=settings.RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY)
+                message=json.dumps(data), routing_key=routing_key)
         logger.info(user='PUBLISHER',
-                    message=f'Data({user} - {team}) sent to {settings.RABBITMQ_USER_KICKED_FROM_TEAM_ROUTING_KEY}', logger=logger.mb_logger)
+                    message=f'Data({data}) sent to {routing_key}', logger=logger.mb_logger)
     except Exception as e:
         logger.error(
-            user='PUBLISHER', message=f'Error while publishing message on user {user} kicked from {team}: {e}', logger=logger.mb_logger)
+            user='PUBLISHER', message=f'Error while publishing message {data} on routing key {routing_key}: {e}', logger=logger.mb_logger)

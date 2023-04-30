@@ -54,7 +54,7 @@ def create_participation(user, team, role=constants.MEMBER_ROLE, status=constant
         return participation
 
 
-@override_settings(MEDIA_ROOT=(TEST_DIR + '/media'))
+@override_settings(MEDIA_ROOT=(TEST_DIR + '/media'), DEBUG=True)
 class TestTeamManagement(TransactionTestCase):
     reset_sequences = True
 

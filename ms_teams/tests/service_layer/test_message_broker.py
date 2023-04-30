@@ -1,18 +1,22 @@
 import json
-
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.conf import settings
-import app.models as models
 
 
 import service_layer.message_broker as mb
-import entrypoints.event_consumer as ec
+import service_layer.services as services
 
 
+@override_settings(DEBUG=True)
 class TestRabbitMQ(TestCase):
 
     def setUp(self) -> None:
-        self.mb = mb.RabbitMQ(exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+        self.mb = mb.RabbitMQ(host=settings.RABBITMQ_TEST_HOST,
+                              port=settings.RABBITMQ_TEST_PORT,
+                              username=settings.RABBITMQ_TEST_USER,
+                              password=settings.RABBITMQ_TEST_PASSWORD,
+                              exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
+                              vhost='test')
 
     def test_publish_message_should_publish_message(self):
         q = 'test_publish_message_should_publish_message.teams.queue'
@@ -59,3 +63,27 @@ class TestRabbitMQ(TestCase):
                        message=json.dumps(message_for_sub))
             mb.subscribe(queue=q, callback=callback,
                          routing_key='test.data.rk')
+
+
+@override_settings(DEBUG=True)
+class TestPublishServices(TestCase):
+    def setUp(self) -> None:
+        self.mb = mb.RabbitMQ(
+            host=settings.RABBITMQ_TEST_HOST,
+            port=settings.RABBITMQ_TEST_PORT,
+            username=settings.RABBITMQ_TEST_USER,
+            password=settings.RABBITMQ_TEST_PASSWORD,
+            exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
+            vhost='test'
+        )
+
+    def test_handle_publish_message_on_team_services(self):
+        with self.mb as message_broker:
+            def callback(ch, method, properties, body):
+                self.assertEqual(json.loads(body), '123')
+                ch.stop_consuming()
+            services.handle_publish_message_on_team_services(
+                data='123', routing_key='tester5345')
+            message_broker.subscribe(queue='123',
+                                     callback=callback, routing_key='tester5345')
+            message_broker.start_consuming()

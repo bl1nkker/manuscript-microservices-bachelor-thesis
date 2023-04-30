@@ -1,17 +1,13 @@
-import json
-import pika
-
-from django.test import TestCase
-from django.conf import settings
+from django.test import TestCase, override_settings
 
 from service_layer.result import Result
 import service_layer.services as services
 import service_layer.unit_of_work as uow
 import core.exceptions as exceptions
-import service_layer.message_broker as mb
 import core.constants as constants
 
 
+@override_settings(DEBUG=True)
 class TestTeamServices(TestCase):
     def setUp(self) -> None:
         self.uow = uow.FakeUnitOfWork()
