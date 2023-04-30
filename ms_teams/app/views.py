@@ -115,7 +115,7 @@ def team_participants(request, team_id: int):
             return Response(result.to_response(), status=400)
 
 
-@api_view(['PUT'])
+@api_view(['PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def team_participant(request, team_id: int, participant_id: int):
     uow = unit_of_work.DjangoORMUnitOfWork()
@@ -124,7 +124,7 @@ def team_participant(request, team_id: int, participant_id: int):
             request.user, f"PUT /teams/{team_id}/participants/{participant_id}")
         username = request.user.username
         status = request.data['status']
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow, username=username, team_id=team_id, participant_id=participant_id, status=status)
         if result.is_ok:
             logger.info(
@@ -133,4 +133,18 @@ def team_participant(request, team_id: int, participant_id: int):
         else:
             logger.warning(
                 request.user, f"PUT /teams/{team_id}/participants/{participant_id} FAIL {result.to_response()}")
+            return Response(result.to_response(), status=400)
+    elif request.method == 'DELETE':
+        logger.info(
+            request.user, f"DELETE /teams/{team_id}/participants/{participant_id}")
+        username = request.user.username
+        result = services.kick_team_participant_service(
+            uow, username=username, team_id=team_id, participant_id=participant_id)
+        if result.is_ok:
+            logger.info(
+                request.user, f"DELETE /teams/{team_id}/participants/{participant_id} SUCCESS")
+            return Response(result.to_response(), status=200)
+        else:
+            logger.warning(
+                request.user, f"DELETE /teams/{team_id}/participants/{participant_id} FAIL {result.to_response()}")
             return Response(result.to_response(), status=400)

@@ -285,7 +285,7 @@ class TestTeamServices(TestCase):
             'role': constants.MEMBER_ROLE,
             'status': constants.APPLIED_STATUS,
         }, error=None)
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow=self.uow, username=self.user.username, team_id=team.id, participant_id=participant.id, status=constants.APPLIED_STATUS)
         self.assertEqual(expected, result)
         another_user = self.uow.user.create(username="another_user")
@@ -304,13 +304,13 @@ class TestTeamServices(TestCase):
             'role': constants.MEMBER_ROLE,
             'status': constants.DECLINED_STATUS,
         }, error=None)
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow=self.uow, username=self.user.username, team_id=team.id, participant_id=participant.id, status=constants.DECLINED_STATUS)
         self.assertEqual(expected, result)
 
     def test_change_team_participation_service_should_return_result_with_error_when_team_is_not_found(self):
         expected = Result(data=None, error=exceptions.TeamNotFoundException)
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow=self.uow, username=self.user.username, team_id=999, participant_id=999, status=constants.APPLIED_STATUS)
         self.assertEqual(expected, result)
 
@@ -318,7 +318,7 @@ class TestTeamServices(TestCase):
         team = self.create_team()
         expected = Result(
             data=None, error=exceptions.UserIsNotParticipantException)
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow=self.uow, username=self.user.username, team_id=team.id, participant_id=999, status=constants.APPLIED_STATUS)
         self.assertEqual(expected, result)
 
@@ -329,7 +329,7 @@ class TestTeamServices(TestCase):
             user=another_user, team=team, status=constants.APPLIED_STATUS, role=constants.MEMBER_ROLE)
         expected = Result(
             data=None, error=exceptions.UserIsNotTeamLeaderException)
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow=self.uow, username=another_user.username, team_id=team.id, participant_id=participant.id, status=constants.PENDING_STATUS)
         self.assertEqual(expected, result)
 
@@ -340,7 +340,7 @@ class TestTeamServices(TestCase):
             user=another_user, team=team, status=constants.APPLIED_STATUS, role=constants.MEMBER_ROLE)
         expected = Result(
             data=None, error=exceptions.InvalidParticipantStatusException)
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow=self.uow, username=self.user.username, team_id=team.id, participant_id=participant.id, status='invalid_status')
         self.assertEqual(expected, result)
 
@@ -351,13 +351,54 @@ class TestTeamServices(TestCase):
             user=another_user, team=team, status=constants.APPLIED_STATUS, role=constants.MEMBER_ROLE)
         expected = Result(
             data=None, error=exceptions.ParticipantAlreadyHasStatusException)
-        result = services.change_team_participation_service(
+        result = services.change_team_participation_request_status_service(
             uow=self.uow, username=self.user.username, team_id=team.id, participant_id=participant.id, status=constants.APPLIED_STATUS)
         self.assertEqual(expected, result)
-    # # Kick
+    # Kick
 
-    # def test_kick_team_service_should_return_result_with_error_when_team_is_not_found(self):
-    #     expected = Result(data=None, error=exceptions.TeamNotFoundException)
-    #     result = services.kick_team_member_service(
-    #         uow=self.uow, username=self.user.username, team_id=999, member_id=999)
-    #     self.assertEqual(expected, result)
+    def test_kick_team_participant_service_should_return_result_with_kicked_participant(self):
+        team = self.create_team()
+        another_user = self.uow.user.create(username="another_user")
+        participant = self.uow.participant.create(
+            user=another_user, team=team, status=constants.APPLIED_STATUS, role=constants.MEMBER_ROLE)
+        expected = Result(data={
+            'id': 2,
+            'user': another_user.to_dict(),
+            'team': {
+                'id': 1,
+                "name": "test_team",
+                "image": 'test_image',
+                'event': self.event,
+                'is_active': True,
+            },
+            'role': constants.MEMBER_ROLE,
+            'status': constants.KICKED_STATUS,
+        }, error=None)
+        result = services.kick_team_participant_service(
+            uow=self.uow, username=self.user.username, team_id=team.id, participant_id=participant.id)
+        self.assertEqual(expected, result)
+
+    def test_kick_team_participant_service_should_return_result_with_error_when_team_is_not_found(self):
+        expected = Result(data=None, error=exceptions.TeamNotFoundException)
+        result = services.kick_team_participant_service(
+            uow=self.uow, username=self.user.username, team_id=999, participant_id=999)
+        self.assertEqual(expected, result)
+
+    def test_kick_team_participant_service_should_return_result_with_error_when_participant_is_not_found(self):
+        team = self.create_team()
+        expected = Result(
+            data=None, error=exceptions.UserIsNotParticipantException)
+        result = services.kick_team_participant_service(
+            uow=self.uow, username=self.user.username, team_id=team.id, participant_id=999)
+        self.assertEqual(expected, result)
+
+    def test_kick_team_participant_service_should_return_result_with_error_when_user_is_not_team_leader(self):
+        team = self.create_team()
+        another_user = self.uow.user.create(username="another_user")
+        participant = self.uow.participant.create(
+            user=another_user, team=team, status=constants.APPLIED_STATUS, role=constants.MEMBER_ROLE)
+        expected = Result(
+            data=None, error=exceptions.UserIsNotTeamLeaderException)
+        result = services.kick_team_participant_service(
+            uow=self.uow, username=another_user.username, team_id=team.id, participant_id=participant.id)
+        self.assertEqual(expected, result)

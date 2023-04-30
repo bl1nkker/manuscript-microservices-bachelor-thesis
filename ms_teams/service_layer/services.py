@@ -89,7 +89,7 @@ def join_team_request_service(uow: uow.AbstractUnitOfWork, username: str, team_i
         return Result(data=participant.to_dict(), error=None)
 
 
-def change_team_participation_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, participant_id: int, status: str):
+def change_team_participation_request_status_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, participant_id: int, status: str):
     with uow:
         if status not in constants.PARTICIPANT_STATUSES:
             return Result(data=None, error=exceptions.InvalidParticipantStatusException)
@@ -111,21 +111,24 @@ def change_team_participation_service(uow: uow.AbstractUnitOfWork, username: str
         # Notify Message Broker
         return Result(data=participant.to_dict(), error=None)
 
-# def kick_team_member_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, member_id: int):
-#     with uow:
-#         team = uow.team.get(id=team_id)
-#         if team is None:
-#             return Result(data=None, error=exceptions.TeamNotFoundException)
-#         # if team.leader.username != username:
-#         #     return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
-#         updated_members = [
-#             member for member in team.get_members() if member.id != member_id]
-#         team = uow.team.edit(id=team.id, members=updated_members)
-#         # try:
-#         #     handle_publish_message_on_user_kicked(user=member_id, team=team.id)
-#         # except Exception as e:
-#         #     print('Error while publishing message', e)
-#         return Result(data=team.to_dict(), error=None)
+
+def kick_team_participant_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, participant_id: int):
+    with uow:
+        team = uow.team.get(id=team_id)
+        if team is None:
+            return Result(data=None, error=exceptions.TeamNotFoundException)
+        participant = uow.participant.get(id=participant_id, team=team)
+        if not participant:
+            return Result(data=None, error=exceptions.UserIsNotParticipantException)
+        user = uow.user.get(username=username)
+        leader = uow.participant.get(
+            user=user, team=team, role=constants.LEADER_ROLE)
+        if not leader:
+            return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
+        participant = uow.participant.edit(
+            id=participant.id, status=constants.KICKED_STATUS)
+        # Notify Message Broker
+        return Result(data=participant.to_dict(), error=None)
 
 
 def handle_publish_message_on_user_kicked(user, team):
