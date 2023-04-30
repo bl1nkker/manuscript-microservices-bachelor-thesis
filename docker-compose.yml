@@ -87,6 +87,18 @@ services:
       - ms_users_db
     restart: always
 
+  ms_notifications:
+    build: ./ms_notifications
+    container_name: ms_notifications
+    command: sh -c "python manage.py migrate && gunicorn ms_notifications.wsgi:application -c gunicorn.conf.py"
+    volumes:
+      - ./ms_notifications:/usr/src/app
+    ports:
+      - "16040:16040"
+    depends_on:
+      - ms_notifications_db
+    restart: always
+
   # Consumers
   ms_event_consumer:
     build: ./ms_event

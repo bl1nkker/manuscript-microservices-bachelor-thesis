@@ -1,9 +1,9 @@
 # Database settings
 DB_ENGINE: django.db.backends.postgresql
-DB_HOST: 0.0.0.0
-DB_PORT: 54324
-# DB_HOST: ms_notifications_db
+# DB_HOST: 0.0.0.0
 # DB_PORT: 54324
+DB_HOST: ms_notifications_db
+DB_PORT: 5432
 
 DB_USER: postgres
 DB_PASS: postgres
