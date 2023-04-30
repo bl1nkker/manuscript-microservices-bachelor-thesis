@@ -402,3 +402,91 @@ class TestTeamServices(TestCase):
         result = services.kick_team_participant_service(
             uow=self.uow, username=another_user.username, team_id=team.id, participant_id=participant.id)
         self.assertEqual(expected, result)
+
+    # Leave
+    def test_leave_team_service_should_return_result_with_left_participant(self):
+        team = self.create_team()
+        another_user = self.uow.user.create(username="another_user")
+        self.uow.participant.create(
+            user=another_user, team=team, status=constants.APPLIED_STATUS, role=constants.MEMBER_ROLE)
+        expected = Result(data={
+            'id': 2,
+            'user': another_user.to_dict(),
+            'team': {
+                'id': 1,
+                "name": "test_team",
+                "image": 'test_image',
+                'event': self.event,
+                'is_active': True,
+            },
+            'role': constants.MEMBER_ROLE,
+            'status': constants.LEFT_STATUS,
+        }, error=None)
+        result = services.leave_team_service(
+            uow=self.uow, username=another_user.username, team_id=team.id)
+        self.assertEqual(expected, result)
+        team = self.uow.team.get(id=team.id)
+        self.assertEqual(team.is_active, True)
+
+    def test_leave_team_service_should_return_result_with_left_participant_and_deactivate_team_if_user_is_leader_and_there_are_no_other_participants(self):
+        team = self.create_team()
+        expected = Result(data={
+            'id': 1,
+            'user': self.user.to_dict(),
+            'team': {
+                'id': 1,
+                "name": "test_team",
+                "image": 'test_image',
+                'event': self.event,
+                'is_active': False,
+            },
+            'role': constants.LEADER_ROLE,
+            'status': constants.LEFT_STATUS,
+        }, error=None)
+        result = services.leave_team_service(
+            uow=self.uow, username=self.user.username, team_id=team.id)
+        self.assertEqual(expected, result)
+        team = self.uow.team.get(id=team.id)
+        self.assertEqual(team.is_active, False)
+
+    def test_leave_team_service_should_return_result_with_left_participant_and_set_another_participant_to_leader(self):
+        team = self.create_team()
+        another_user = self.uow.user.create(username="another_user")
+        self.uow.participant.create(
+            user=another_user, team=team, status=constants.APPLIED_STATUS, role=constants.MEMBER_ROLE)
+        expected = Result(data={
+            'id': 1,
+            'user': self.user.to_dict(),
+            'team': {
+                'id': 1,
+                "name": "test_team",
+                "image": 'test_image',
+                'event': self.event,
+                'is_active': True,
+            },
+            'role': constants.LEADER_ROLE,
+            'status': constants.LEFT_STATUS,
+        }, error=None)
+        result = services.leave_team_service(
+            uow=self.uow, username=self.user.username, team_id=team.id)
+        self.assertEqual(expected, result)
+        team = self.uow.team.get(id=team.id)
+        self.assertEqual(team.is_active, True)
+        another_participant = self.uow.participant.get(
+            user=another_user, team=team)
+        self.assertEqual(another_participant.role, constants.LEADER_ROLE)
+
+    def test_leave_team_service_should_return_result_with_error_when_team_is_not_found(self):
+        expected = Result(data=None, error=exceptions.TeamNotFoundException)
+        result = services.leave_team_service(
+            uow=self.uow, username=self.user.username, team_id=999)
+        self.assertEqual(expected, result)
+
+    def test_leave_team_service_should_return_result_with_error_when_participant_is_not_found(self):
+        team = self.create_team()
+        another_user = self.uow.user.create(username="another_user")
+        expected = Result(
+            data=None, error=exceptions.UserIsNotParticipantException)
+        result = services.leave_team_service(
+            uow=self.uow, username=another_user.username, team_id=team.id)
+        self.assertEqual(expected, result)

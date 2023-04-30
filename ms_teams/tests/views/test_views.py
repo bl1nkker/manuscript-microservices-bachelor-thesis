@@ -321,7 +321,54 @@ class TestTeamManagement(TransactionTestCase):
             f"/teams/{team.id}/participants", **{"HTTP_AUTHORIZATION": f"Bearer "}, data=body)
         self.assertEqual(response.status_code, 403)
 
+    # Leave
+    def test_team_participants_delete_should_return_participant(self):
+        team = create_team(user=self.user, event=self.event)
+        another_user = create_user(username='another_user')
+        create_participation(user=another_user, team=team,
+                             status=constants.APPLIED_STATUS)
+        token = another_user.generate_jwt_token()
+        response = self.client.delete(
+            f"/teams/{team.id}/participants", **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
+        self.assertEqual(response.status_code, 200)
+        content = response.data
+        self.assertEqual(content['data']['user'], another_user.to_dict())
+        self.assertEqual(content['data']['team'], team.to_dict())
+        self.assertEqual(content['data']['role'], constants.MEMBER_ROLE)
+        self.assertEqual(content['data']['status'], constants.LEFT_STATUS)
+
+    def test_team_participants_delete_should_return_error_when_team_is_not_found(self):
+        team = create_team(user=self.user, event=self.event)
+        another_user = create_user(username='another_user')
+        participation = create_participation(
+            user=another_user, team=team, status=constants.APPLIED_STATUS)
+        token = self.user.generate_jwt_token()
+        response = self.client.delete(
+            f"/teams/999/participants", **{"HTTP_AUTHORIZATION": f"Bearer {token}"}, )
+        self.assertEqual(response.status_code, 400)
+        content = response.data
+        self.assertEqual(content['error'],
+                         exceptions.TEAM_NOT_FOUND_EXCEPTION_MESSAGE)
+
+    def test_team_participants_delete_should_return_error_when_participant_is_not_found(self):
+        team = create_team(user=self.user, event=self.event)
+        another_user = create_user(username='another_user')
+        token = another_user.generate_jwt_token()
+        response = self.client.delete(
+            f"/teams/{team.id}/participants", **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
+        self.assertEqual(response.status_code, 400)
+        content = response.data
+        self.assertEqual(
+            content['error'], exceptions.USER_IS_NOT_PARTICIPANT_EXCEPTION_MESSAGE)
+
+    def test_team_participants_delete_should_return_error_when_user_is_anonymous(self):
+        team = create_team(user=self.user, event=self.event)
+        response = self.client.delete(
+            f"/teams/{team.id}/participants")
+        self.assertEqual(response.status_code, 403)
+
     # Apply/Decline
+
     def test_team_participant_put_should_return_participant_with_corresponding_status(self):
         team = create_team(user=self.user, event=self.event)
         another_user = create_user(username='another_user')

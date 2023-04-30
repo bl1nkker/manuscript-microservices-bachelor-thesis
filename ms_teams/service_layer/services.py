@@ -131,6 +131,31 @@ def kick_team_participant_service(uow: uow.AbstractUnitOfWork, username: str, te
         return Result(data=participant.to_dict(), error=None)
 
 
+def leave_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int):
+    with uow:
+        team = uow.team.get(id=team_id)
+        if team is None:
+            return Result(data=None, error=exceptions.TeamNotFoundException)
+        user = uow.user.get(username=username)
+        participant = uow.participant.get(
+            user=user, team=team, status=constants.APPLIED_STATUS)
+        if not participant:
+            return Result(data=None, error=exceptions.UserIsNotParticipantException)
+        participant = uow.participant.edit(
+            id=participant.id, status=constants.LEFT_STATUS)
+        if participant.role == constants.LEADER_ROLE:
+            participants = uow.participant.list(
+                team=team, status=constants.APPLIED_STATUS)
+            if participants:
+                new_leader = participants[0]
+                new_leader = uow.participant.edit(
+                    id=new_leader.id, role=constants.LEADER_ROLE)
+            else:
+                team = uow.team.deactivate(id=team.id)
+        # Notify Message Broker
+        return Result(data=participant.to_dict(), error=None)
+
+
 def handle_publish_message_on_user_kicked(user, team):
     try:
         if settings.DEBUG:

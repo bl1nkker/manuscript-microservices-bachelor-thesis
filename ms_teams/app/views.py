@@ -97,7 +97,7 @@ def kick(request, team_id: int, member_id: int):
             return Response(result.to_response(), status=400)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def team_participants(request, team_id: int):
     uow = unit_of_work.DjangoORMUnitOfWork()
@@ -112,6 +112,18 @@ def team_participants(request, team_id: int):
         else:
             logger.warning(
                 request.user, f"POST /teams/{team_id}/participants FAIL {result.to_response()}")
+            return Response(result.to_response(), status=400)
+    elif request.method == 'DELETE':
+        logger.info(request.user, f"DELETE /teams/{team_id}/participants")
+        result = services.leave_team_service(
+            uow, team_id=team_id, username=request.user.username)
+        if result.is_ok:
+            logger.info(
+                request.user, f"DELETE /teams/{team_id}/participants SUCCESS")
+            return Response(result.to_response(), status=200)
+        else:
+            logger.warning(
+                request.user, f"DELETE /teams/{team_id}/participants FAIL {result.to_response()}")
             return Response(result.to_response(), status=400)
 
 
