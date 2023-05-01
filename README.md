@@ -36,11 +36,14 @@ PORTS:
 
 TODO:
 
-- think about notification service
-- kick/join team member
+- test every message broker
+- test everything
+- write proper documentation
 - add images to response
 
 - dashboards
+- telegram bot
+- github actions
 - k8s
 
 if there are any processes:

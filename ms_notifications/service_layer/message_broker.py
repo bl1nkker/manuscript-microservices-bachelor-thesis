@@ -4,7 +4,7 @@ import pika
 from abc import ABC, abstractmethod
 import os
 from django.conf import settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_teams.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_notifications.settings'
 
 
 class AbstractMessageBroker(ABC):

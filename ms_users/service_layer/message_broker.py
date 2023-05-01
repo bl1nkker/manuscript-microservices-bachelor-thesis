@@ -74,7 +74,12 @@ class RabbitMQ(AbstractMessageBroker):
         self.channel.basic_consume(
             queue=queue_name, on_message_callback=callback, auto_ack=True)
 
-    def start_consuming(self):
+    def queue_bind(self, queue, routing_key):
+        self.channel.queue_bind(
+            exchange=self.exchange, queue=queue, routing_key=routing_key)
+
+    def start_consuming(self, queue, callback):
+        self.channel.basic_consume(queue=queue, on_message_callback=callback, auto_ack=True)
         self.channel.start_consuming()
 
     def disconnect(self):

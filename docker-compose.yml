@@ -122,17 +122,27 @@ services:
       - ms_teams
     restart: always
 
-  ms_users_consumer:
-    build: ./ms_users
-    container_name: ms_users_consumer
+  # ms_users_consumer:
+  #   build: ./ms_users
+  #   container_name: ms_users_consumer
+  #   command: sh -c "python -m entrypoints.event_consumer"
+  #   volumes:
+  #     - ./ms_users:/usr/src/app
+  #   depends_on:
+  #     - ms_users_db
+  #     - ms_users
+  #   restart: always
+
+  ms_notifications_consumer:
+    build: ./ms_notifications
+    container_name: ms_notifications_consumer
     command: sh -c "python -m entrypoints.event_consumer"
     volumes:
-      - ./ms_users:/usr/src/app
+      - ./ms_notifications:/usr/src/app
     depends_on:
-      - ms_users_db
-      - ms_users
+      - ms_notifications_db
+      - ms_notifications
     restart: always
-
   # Proxy
   nginx-proxy:
     build: ./proxy
@@ -146,16 +156,16 @@ services:
       - "443:443"
 
   # For testing
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672" # Expose port 5672 for AMQP
-      - "15672:15672" # Expose port 15672 for RabbitMQ management
-    environment:
-      - RABBITMQ_DEFAULT_USER=manuscript # Set RabbitMQ username
-      - RABBITMQ_DEFAULT_PASS=manuscript # Set RabbitMQ password
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq/mnesia # Mount a volume for persistent data
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   ports:
+  #     - "5672:5672" # Expose port 5672 for AMQP
+  #     - "15672:15672" # Expose port 15672 for RabbitMQ management
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=manuscript # Set RabbitMQ username
+  #     - RABBITMQ_DEFAULT_PASS=manuscript # Set RabbitMQ password
+  #   volumes:
+  #     - rabbitmq_data:/var/lib/rabbitmq/mnesia # Mount a volume for persistent data
 
 volumes:
   pg_data-event:

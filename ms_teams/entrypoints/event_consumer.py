@@ -1,22 +1,30 @@
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_teams.settings'
 import json
 import service_layer.message_broker as mb
+import django
+django.setup()
+import app.models as models
 from django.conf import settings
-import os
 import core.logger as logger
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ms_teams.settings'
 
 
-def start(message_broker):
+def start(message_broker: mb.RabbitMQ):
     logger.info(user='CONSUMER',
                 message='Starting message broker connection...', logger=logger.mb_logger)
     try:
+        binds = [
+            (settings.RABBITMQ_QUEUE_USER_CREATED, settings.RABBITMQ_USER_CREATE_ROUTING_KEY, handle_user_creation),
+            (settings.RABBITMQ_QUEUE_EVENT_CREATE, settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY, handle_event_creation),
+            (settings.RABBITMQ_QUEUE_EVENT_EDIT, settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY, handle_event_edit),
+        ]
         with message_broker:
-            message_broker.subscribe(
-                queue=settings.RABBITMQ_QUEUE, callback=handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
-            message_broker.subscribe(
-                queue=settings.RABBITMQ_QUEUE, callback=handle_event_creation, routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY)
-            message_broker.subscribe(
-                queue=settings.RABBITMQ_QUEUE, callback=handle_event_edit, routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY)
+            for item in binds:
+                (queue, routing_key, callback) = item
+                message_broker.channel.queue_declare(queue=queue, durable=True)
+                message_broker.queue_bind(queue=queue, routing_key=routing_key)
+                message_broker.channel.basic_consume(
+                    queue=queue, on_message_callback=callback, auto_ack=True)
             message_broker.start_consuming()
     except Exception as e:
         logger.error(user='CONSUMER',
@@ -25,14 +33,10 @@ def start(message_broker):
         logger.info(user='CONSUMER',
                     message='Closing message broker connection...', logger=logger.mb_logger)
 
-
 def handle_user_creation(ch, method, properties, body):
     logger.info(user='CONSUMER',
                 message=f'Handle user creation with body: {body}', logger=logger.mb_logger)
     data = json.loads(body)
-    import django
-    django.setup()
-    import app.models as models
     user = models.User.objects.create(
         username=data['username'],
         email=data['username'],
@@ -52,9 +56,6 @@ def handle_event_creation(ch, method, properties, body):
                 message=f'Handle event creation with body: {body}', logger=logger.mb_logger)
     try:
         data = json.loads(body)
-        import django
-        django.setup()
-        import app.models as models
         models.Event.objects.create(
             name=data['name'],
             id=data['id'],
@@ -72,9 +73,6 @@ def handle_event_edit(ch, method, properties, body):
                 message=f'Handle event edit with body: {body}', logger=logger.mb_logger)
     try:
         data = json.loads(body)
-        import django
-        django.setup()
-        import app.models as models
         event = models.Event.objects.get(id=data['id'])
         event.name = data['name']
         event.is_active = data['is_active']
