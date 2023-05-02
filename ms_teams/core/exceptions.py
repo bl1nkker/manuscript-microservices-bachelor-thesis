@@ -4,7 +4,7 @@ EVENT_NOT_FOUND_EXCEPTION_MESSAGE = "Event not found"
 USER_IS_NOT_TEAM_LEADER_EXCEPTION_MESSAGE = "User is not team leader"
 USER_IS_NOT_TEAM_MEMBER_EXCEPTION_MESSAGE = "User is not team member"
 USER_ALREADY_HAS_PARTICIPATION_EXCEPTION_MESSAGE = "User already has participation"
-USER_IS_NOT_PARTICIPANT_EXCEPTION_MESSAGE = "User is not participant"
+PARTICIPANT_NOT_FOUND_EXCEPTION_MESSAGE = "User is not participant"
 INVALID_PARTICIPANT_STATUS_EXCEPTION_MESSAGE = "Invalid participant status"
 PARTICIPANT_ALREADY_HAS_STATUS_EXCEPTION_MESSAGE = "Participant already has status"
 
@@ -33,8 +33,8 @@ class UserAlreadyHasParticipationException(Exception):
     message = USER_ALREADY_HAS_PARTICIPATION_EXCEPTION_MESSAGE
 
 
-class UserIsNotParticipantException(Exception):
-    message = USER_IS_NOT_PARTICIPANT_EXCEPTION_MESSAGE
+class ParticipantNotFoundException(Exception):
+    message = PARTICIPANT_NOT_FOUND_EXCEPTION_MESSAGE
 
 
 class InvalidParticipantStatusException(Exception):

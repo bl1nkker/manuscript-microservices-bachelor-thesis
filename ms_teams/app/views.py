@@ -64,7 +64,7 @@ def team(request, team_id: int):
             uow=uow, team_id=team_id, username=username, **body)
         if result.is_ok:
             logger.info(request.user, f"PUT /teams/{team_id} SUCCESS")
-            return Response(result.to_response(), status=204)
+            return Response(result.to_response(), status=200)
         else:
             logger.warning(
                 request.user, f"PUT /teams/{team_id} FAIL {result.to_response()}")
@@ -76,24 +76,10 @@ def team(request, team_id: int):
             uow=uow, team_id=team_id, username=username)
         if result.is_ok:
             logger.info(request.user, f"DELETE /teams/{team_id} SUCCESS")
-            return Response(result.to_response(), status=204)
+            return Response(result.to_response(), status=200)
         else:
             logger.warning(
                 request.user, f"DELETE /teams/{team_id} FAIL {result.to_response()}")
-            return Response(result.to_response(), status=400)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def kick(request, team_id: int, member_id: int):
-    uow = unit_of_work.DjangoORMUnitOfWork()
-    if request.method == 'GET':
-        username = request.user.username
-        result = services.kick_team_member_service(
-            uow=uow, team_id=team_id, username=username, member_id=member_id)
-        if result.is_ok:
-            return Response(result.to_response(), status=200)
-        else:
             return Response(result.to_response(), status=400)
 
 
@@ -135,7 +121,7 @@ def team_participant(request, team_id: int, participant_id: int):
         logger.info(
             request.user, f"PUT /teams/{team_id}/participants/{participant_id}")
         username = request.user.username
-        status = request.data['status']
+        status = request.data.get('status', None)
         result = services.change_team_participation_request_status_service(
             uow, username=username, team_id=team_id, participant_id=participant_id, status=status)
         if result.is_ok:

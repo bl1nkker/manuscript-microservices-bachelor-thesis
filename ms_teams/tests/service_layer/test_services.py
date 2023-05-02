@@ -313,7 +313,7 @@ class TestTeamServices(TestCase):
     def test_change_team_participation_service_should_return_result_with_error_when_participant_is_not_found(self):
         team = self.create_team()
         expected = Result(
-            data=None, error=exceptions.UserIsNotParticipantException)
+            data=None, error=exceptions.ParticipantNotFoundException)
         result = services.change_team_participation_request_status_service(
             uow=self.uow, username=self.user.username, team_id=team.id, participant_id=999, status=constants.APPLIED_STATUS)
         self.assertEqual(expected, result)
@@ -383,7 +383,7 @@ class TestTeamServices(TestCase):
     def test_kick_team_participant_service_should_return_result_with_error_when_participant_is_not_found(self):
         team = self.create_team()
         expected = Result(
-            data=None, error=exceptions.UserIsNotParticipantException)
+            data=None, error=exceptions.ParticipantNotFoundException)
         result = services.kick_team_participant_service(
             uow=self.uow, username=self.user.username, team_id=team.id, participant_id=999)
         self.assertEqual(expected, result)
@@ -482,7 +482,7 @@ class TestTeamServices(TestCase):
         team = self.create_team()
         another_user = self.uow.user.create(username="another_user")
         expected = Result(
-            data=None, error=exceptions.UserIsNotParticipantException)
+            data=None, error=exceptions.ParticipantNotFoundException)
         result = services.leave_team_service(
             uow=self.uow, username=another_user.username, team_id=team.id)
         self.assertEqual(expected, result)

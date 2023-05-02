@@ -185,7 +185,7 @@ class TestTeamManagement(TransactionTestCase):
         token = self.user.generate_jwt_token()
         response = self.client.put(
             f"/teams/{team.id}", **{"HTTP_AUTHORIZATION": f"Bearer {token}"}, data=body)
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
         content = response.data
         self.assertEqual(content['data']['name'], 'test_team updated')
         self.assertEqual(content['data']['event'], self.event.to_dict())
@@ -236,7 +236,7 @@ class TestTeamManagement(TransactionTestCase):
         token = self.user.generate_jwt_token()
         response = self.client.delete(
             f"/teams/{team.id}", **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
         content = response.data
         self.assertEqual(content['data']['name'], 'test_team')
         self.assertEqual(content['data']['event'], self.event.to_dict())
@@ -359,7 +359,7 @@ class TestTeamManagement(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(
-            content['error'], exceptions.USER_IS_NOT_PARTICIPANT_EXCEPTION_MESSAGE)
+            content['error'], exceptions.PARTICIPANT_NOT_FOUND_EXCEPTION_MESSAGE)
 
     def test_team_participants_delete_should_return_error_when_user_is_anonymous(self):
         team = create_team(user=self.user, event=self.event)
@@ -428,7 +428,7 @@ class TestTeamManagement(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(
-            content['error'], exceptions.USER_IS_NOT_PARTICIPANT_EXCEPTION_MESSAGE)
+            content['error'], exceptions.PARTICIPANT_NOT_FOUND_EXCEPTION_MESSAGE)
 
     def test_team_participant_put_should_return_error_when_user_is_not_team_leader(self):
         team = create_team(user=self.user, event=self.event)
@@ -527,7 +527,7 @@ class TestTeamManagement(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         content = response.data
         self.assertEqual(
-            content['error'], exceptions.USER_IS_NOT_PARTICIPANT_EXCEPTION_MESSAGE)
+            content['error'], exceptions.PARTICIPANT_NOT_FOUND_EXCEPTION_MESSAGE)
 
     def test_team_participant_put_should_return_error_when_user_is_not_team_leader(self):
         team = create_team(user=self.user, event=self.event)

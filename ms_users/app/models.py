@@ -24,6 +24,6 @@ class ManuscriptUser(models.Model):
         token = jwt.encode({
             "id": self.id,
             "email": self.user.email,
-        }, settings.SECRET_KEY, algorithm='HS256')
+        }, settings.TOKEN_SECRET, algorithm='HS256')
 
         return token

@@ -260,7 +260,7 @@ class TestEventManagement(TransactionTestCase):
         token = self.user.generate_jwt_token()
         response = self.client.put(
             f"/events/{self.event.id}", **{"HTTP_AUTHORIZATION": f"Bearer {token}"}, data=body,)
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
         content = response.data
         self.assertEqual(content['data']['name'], 'test_event updated')
         self.assertEqual(content['data']["location"], 'Almaty, updated')
@@ -347,11 +347,12 @@ class TestEventManagement(TransactionTestCase):
             f"/events/{self.event.id}", data=body)
         self.assertEqual(response.status_code, 403)
 
+    # Deactivate
     def test_event_delete_should_deactivate_event(self):
         token = self.user.generate_jwt_token()
         response = self.client.delete(
             f"/events/{self.event.id}", **{"HTTP_AUTHORIZATION": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
         content = response.data
         self.assertEqual(content['data']['name'], 'test_event')
         self.assertEqual(content['data']["location"], 'Almaty')

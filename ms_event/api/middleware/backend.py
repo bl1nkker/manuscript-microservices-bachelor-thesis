@@ -68,7 +68,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         """
         try:
             payload = jwt.decode(
-                token, settings.SECRET_KEY, algorithms=['HS256'])
+                token, settings.TOKEN_SECRET, algorithms=['HS256'])
         except Exception as e:
             msg = 'Ошибка аутентификации. Невозможно декодировать токен.'
             raise exceptions.AuthenticationFailed(msg)

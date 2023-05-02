@@ -70,7 +70,7 @@ def event(request, event_id):
             uow=uow, id=event_id, username=username, **body)
         if result.is_ok:
             logger.info(request.user, f"PUT /events/{event_id} SUCCESS")
-            return Response(result.to_response(), status=204)
+            return Response(result.to_response(), status=200)
         else:
             logger.warning(
                 request.user, f"PUT /events/{event_id} FAIL {result.to_response()}")
@@ -81,7 +81,7 @@ def event(request, event_id):
             uow=uow, id=event_id, username=username)
         if result.is_ok:
             logger.info(request.user, f"DELETE /events/{event_id} SUCCESS")
-            return Response(result.to_response(), status=204)
+            return Response(result.to_response(), status=200)
         else:
             logger.warning(
                 request.user, f"DELETE /events/{event_id} FAIL {result.to_response()}")

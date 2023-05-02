@@ -103,7 +103,7 @@ def change_team_participation_request_status_service(uow: uow.AbstractUnitOfWork
             return Result(data=None, error=exceptions.TeamNotFoundException)
         participant = uow.participant.get(id=participant_id)
         if not participant:
-            return Result(data=None, error=exceptions.UserIsNotParticipantException)
+            return Result(data=None, error=exceptions.ParticipantNotFoundException)
         if participant.status == status:
             return Result(data=None, error=exceptions.ParticipantAlreadyHasStatusException)
         user = uow.user.get(username=username)
@@ -129,7 +129,7 @@ def kick_team_participant_service(uow: uow.AbstractUnitOfWork, username: str, te
             return Result(data=None, error=exceptions.TeamNotFoundException)
         participant = uow.participant.get(id=participant_id, team=team)
         if not participant:
-            return Result(data=None, error=exceptions.UserIsNotParticipantException)
+            return Result(data=None, error=exceptions.ParticipantNotFoundException)
         user = uow.user.get(username=username)
         leader = uow.participant.get(
             user=user, team=team, role=constants.LEADER_ROLE)
@@ -155,7 +155,7 @@ def leave_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int)
         participant = uow.participant.get(
             user=user, team=team, status=constants.APPLIED_STATUS)
         if not participant:
-            return Result(data=None, error=exceptions.UserIsNotParticipantException)
+            return Result(data=None, error=exceptions.ParticipantNotFoundException)
         participant = uow.participant.edit(
             id=participant.id, status=constants.LEFT_STATUS)
         if participant.role == constants.LEADER_ROLE:
