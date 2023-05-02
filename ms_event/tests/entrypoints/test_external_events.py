@@ -1,5 +1,5 @@
 from django.test import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 from django.conf import settings
 
 import entrypoints.event_consumer as event_consumer
@@ -18,8 +18,17 @@ class TestExternalEvents(TestCase):
         event_consumer.start(mb)
 
         # Assert that the subscribe function was called with the correct parameters
-        mb.subscribe.assert_called_with(
-            queue=settings.RABBITMQ_QUEUE, callback=event_consumer.handle_user_creation, routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY)
+        mb.channel.queue_declare.assert_has_calls([
+            call(queue=settings.RABBITMQ_QUEUE_USER_CREATED, durable=True),
+        ])
+        mb.queue_bind.assert_has_calls([
+            call(queue=settings.RABBITMQ_QUEUE_USER_CREATED,
+                 routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY),
+        ])
+        mb.channel.basic_consume.assert_has_calls([
+            call(queue=settings.RABBITMQ_QUEUE_USER_CREATED,
+                 on_message_callback=event_consumer.handle_user_creation, auto_ack=True),
+        ])
 
     def test_handle_user_creation_event_should_create_user(self):
         # Mock the parameters for RabbitMQ channel, method, properties, and body

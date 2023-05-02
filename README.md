@@ -36,14 +36,19 @@ PORTS:
 
 TODO:
 
-- test every message broker
-- test everything
-- write proper documentation
-- add images to response
-
-- dashboards
-- telegram bot
+- rewrite tests
 - github actions
+- telegram bot
+
+- something wrong with notification proxy
+- filters
+- add user participation status to response with team
+- add notification status
+- add user update description, phone
+- send notification interface
+
+- add images to response
+- dashboards
 - k8s
 
 if there are any processes:

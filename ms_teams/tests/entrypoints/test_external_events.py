@@ -16,14 +16,29 @@ class TestExternalEvents(TestCase):
 
         # Call the start function
         event_consumer.start(mb)
-        mb.subscribe.assert_has_calls([
-            call(queue=settings.RABBITMQ_QUEUE, callback=event_consumer.handle_user_creation,
+        mb.channel.queue_declare.assert_has_calls([
+            call(queue=settings.RABBITMQ_QUEUE_USER_CREATED, durable=True),
+            call(queue=settings.RABBITMQ_QUEUE_EVENT_CREATE, durable=True),
+            call(queue=settings.RABBITMQ_QUEUE_EVENT_EDIT, durable=True),
+        ])
+        mb.queue_bind.assert_has_calls([
+            call(queue=settings.RABBITMQ_QUEUE_USER_CREATED,
                  routing_key=settings.RABBITMQ_USER_CREATE_ROUTING_KEY),
-            call(queue=settings.RABBITMQ_QUEUE, callback=event_consumer.handle_event_creation,
+            call(queue=settings.RABBITMQ_QUEUE_EVENT_CREATE,
                  routing_key=settings.RABBITMQ_EVENT_CREATE_ROUTING_KEY),
-            call(queue=settings.RABBITMQ_QUEUE, callback=event_consumer.handle_event_edit,
+            call(queue=settings.RABBITMQ_QUEUE_EVENT_EDIT,
                  routing_key=settings.RABBITMQ_EVENT_EDIT_ROUTING_KEY),
         ])
+        mb.channel.basic_consume.assert_has_calls([
+            # queue=queue, on_message_callback=callback, auto_ack=True)
+            call(queue=settings.RABBITMQ_QUEUE_USER_CREATED,
+                 on_message_callback=event_consumer.handle_user_creation, auto_ack=True),
+            call(queue=settings.RABBITMQ_QUEUE_EVENT_CREATE,
+                 on_message_callback=event_consumer.handle_event_creation, auto_ack=True),
+            call(queue=settings.RABBITMQ_QUEUE_EVENT_EDIT,
+                 on_message_callback=event_consumer.handle_event_edit, auto_ack=True),
+        ])
+        mb.start_consuming.assert_called_once()
 
     def test_handle_user_creation_event_should_create_user(self):
         # Mock the parameters for RabbitMQ channel, method, properties, and body

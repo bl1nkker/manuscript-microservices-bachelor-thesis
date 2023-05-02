@@ -1,5 +1,7 @@
 # Database settings
 DB_ENGINE: django.db.backends.postgresql
+# DB_HOST: 0.0.0.0
+# DB_PORT: 54323
 DB_HOST: ms_users_db
 DB_PORT: 5432
 
