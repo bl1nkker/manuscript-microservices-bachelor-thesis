@@ -15,14 +15,21 @@ def sign_in_user_service(uow: uow.AbstractUnitOfWork, request, username: str, pa
     return Result(data={"access_token": m_user.generate_jwt_token()})
 
 
-def sign_up_user_service(uow: uow.AbstractUnitOfWork, request, username: str, first_name: str, last_name: str, password: str, confirm_password: str) -> Result:
+def sign_up_user_service(uow: uow.AbstractUnitOfWork, request, **kwargs) -> Result:
+    password = kwargs.get('password', None)
+    confirm_password = kwargs.get('confirm_password', None)
+    username = kwargs.get('username', None)
+    first_name = kwargs.get('first_name', None)
+    last_name = kwargs.get('last_name', None)
+    phone_number = kwargs.get('phone_number', None)
+    description = kwargs.get('description', None)
     if password != confirm_password:
         return Result(data=None, error=exceptions.InvalidUserDataException)
     if not username or not first_name or not last_name:
         return Result(data=None, error=exceptions.InvalidUserDataException)
     with uow:
         user = uow.user.create(username=username, first_name=first_name,
-                               last_name=last_name, password=password, email=username)
+                               last_name=last_name, password=password, email=username, phone_number=phone_number, description=description)
     try:
         handle_publish_message_on_user_created(user=user)
     except Exception as e:

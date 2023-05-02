@@ -63,11 +63,17 @@ class ManuscriptUserRepository(AbstractUserRepository):
         return models.ManuscriptUser.objects.filter(user=user).first()
 
     def create(self, **kwargs):
-        user = models.User.objects.create(**kwargs)
+        username = kwargs.get('username', None)
+        first_name = kwargs.get('first_name', None)
+        last_name = kwargs.get('last_name', None)
+        phone_number = kwargs.get('phone_number')
+        description = kwargs.get('description', None)
+        user = models.User.objects.create(
+            username=username, first_name=first_name, last_name=last_name, email=username)
         if 'password' in kwargs:
             user.set_password(kwargs['password'])
             user.save()
-        return models.ManuscriptUser.objects.create(user=user)
+        return models.ManuscriptUser.objects.create(user=user, phone_number=phone_number, description=description,)
 
     def authenticate(self, request, username, password):
         return django_auth.authenticate(request=request, username=username, password=password)

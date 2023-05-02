@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 
 class ManuscriptUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         return self.user.username
@@ -18,6 +20,8 @@ class ManuscriptUser(models.Model):
             'email': self.user.email,
             'first_name': self.user.first_name,
             'last_name': self.user.last_name,
+            'phone_number': self.phone_number,
+            'description': self.description,
         }
 
     def generate_jwt_token(self):

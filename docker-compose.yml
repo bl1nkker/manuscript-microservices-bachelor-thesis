@@ -54,7 +54,7 @@ services:
   ms_event:
     build: ./ms_event
     container_name: ms_event
-    command: sh -c "python manage.py migrate && gunicorn ms_event.wsgi:application -c gunicorn.conf.py"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn ms_event.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./ms_event:/usr/src/app
     ports:
@@ -66,7 +66,7 @@ services:
   ms_teams:
     build: ./ms_teams
     container_name: ms_teams
-    command: sh -c "python manage.py migrate && gunicorn ms_teams.wsgi:application -c gunicorn.conf.py"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn ms_teams.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./ms_teams:/usr/src/app
     ports:
@@ -78,7 +78,7 @@ services:
   ms_users:
     build: ./ms_users
     container_name: ms_users
-    command: sh -c "python manage.py migrate && gunicorn ms_users.wsgi:application -c gunicorn.conf.py"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn ms_users.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./ms_users:/usr/src/app
     ports:
@@ -90,7 +90,7 @@ services:
   ms_notifications:
     build: ./ms_notifications
     container_name: ms_notifications
-    command: sh -c "python manage.py migrate && gunicorn ms_notifications.wsgi:application -c gunicorn.conf.py"
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn ms_notifications.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./ms_notifications:/usr/src/app
     ports:
