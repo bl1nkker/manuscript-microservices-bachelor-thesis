@@ -28,9 +28,11 @@ def teams(request):
             return Response(result.to_response(), status=400)
     elif request.method == 'GET':
         logger.info(request.user, "GET /teams")
+        username = request.user.username if request.user.is_authenticated else None
         filter_params = {key: value
                          for key, value in request.query_params.items()}
-        result = services.list_team_service(uow=uow, **filter_params)
+        result = services.list_team_service(
+            uow=uow, **filter_params, username=username)
         if result.is_ok:
             logger.info(request.user, "GET /teams SUCCESS")
             return Response(result.to_response(), status=200)
@@ -46,7 +48,9 @@ def team(request, team_id: int):
     uow = unit_of_work.DjangoORMUnitOfWork()
     if request.method == 'GET':
         logger.info(request.user, f"GET /teams/{team_id}")
-        result = services.get_team_service(uow, team_id=team_id)
+        username = request.user.username if request.user.is_authenticated else None
+        result = services.get_team_service(
+            uow, team_id=team_id, username=username)
         if result.is_ok:
             logger.info(request.user, f"GET /teams/{team_id} SUCCESS")
             return Response(result.to_response(), status=200)

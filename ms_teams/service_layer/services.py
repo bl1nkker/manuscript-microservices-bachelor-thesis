@@ -23,21 +23,35 @@ def create_team_service(uow: uow.AbstractUnitOfWork, username: str, event_id: in
         return Result(data={**team.to_dict(), "participants": [participant.to_dict() for participant in participants]}, error=None)
 
 
-def get_team_service(uow: uow.AbstractUnitOfWork, team_id: int):
+def get_team_service(uow: uow.AbstractUnitOfWork, team_id: int, username):
     with uow:
         team = uow.team.get(id=team_id)
         if team is None:
             return Result(data=None, error=exceptions.TeamNotFoundException)
         participants = uow.participant.list(
             team=team, status=constants.APPLIED_STATUS)
+        user = uow.user.get(username=username)
+        participation = uow.participant.get(user=user, team=team)
         return Result(data={**team.to_dict(),
-                            "participants": [participant.to_dict() for participant in participants]}, error=None)
+                            "user_participation_status": participation.status if participation else None,
+                            "participants": [participant.to_dict() for participant in participants]
+                            }, error=None)
 
 
-def list_team_service(uow: uow.AbstractUnitOfWork, **kwargs):
+def list_team_service(uow: uow.AbstractUnitOfWork, username, **kwargs):
     with uow:
         teams = uow.team.list(**kwargs)
-        return Result(data=[team.to_dict() for team in teams], error=None)
+        result = []
+        user = uow.user.get(username=username)
+        for team in teams:
+            participants = uow.participant.list(
+                team=team, status=constants.APPLIED_STATUS)
+            participation = uow.participant.get(user=user, team=team)
+            result.append({**team.to_dict(),
+                           "user_participation_status": participation.status if participation else None,
+                           "participants": [participant.to_dict() for participant in participants]})
+
+        return Result(data=result, error=None)
 
 
 def edit_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int, **kwargs):

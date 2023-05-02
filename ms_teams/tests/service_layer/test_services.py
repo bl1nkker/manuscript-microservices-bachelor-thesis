@@ -78,7 +78,7 @@ class TestTeamServices(TestCase):
         self.assertEqual(expected, result)
 
     # Get
-    def test_get_team_service_should_return_result_with_team(self):
+    def test_get_team_service_should_return_result_with_team_and_empty_user_participation_when_user_has_not_participated(self):
         team = self.create_team()
         expected = Result(data={
             "id": team.id,
@@ -86,6 +86,7 @@ class TestTeamServices(TestCase):
             "image": 'test_image',
             "event": self.event,
             "is_active": True,
+            "user_participation_status": None,
             "participants": [
                 {
                     'id': 1,
@@ -102,34 +103,102 @@ class TestTeamServices(TestCase):
                 }
             ]
         }, error=None)
-        result = services.get_team_service(uow=self.uow, team_id=team.id)
+        result = services.get_team_service(
+            uow=self.uow, team_id=team.id, username=None)
+        self.assertEqual(expected, result)
+
+    def test_get_team_service_should_return_result_with_team_and_user_participation_with_corresponding_status_when_user_has_participated(self):
+        team = self.create_team()
+        another_user = self.uow.user.create(username='another_user')
+        self.uow.participant.create(
+            user=another_user, team=team, status=constants.KICKED_STATUS, role=constants.MEMBER_ROLE)
+        expected = Result(data={
+            "id": team.id,
+            "name": "test_team",
+            "image": 'test_image',
+            "event": self.event,
+            "is_active": True,
+            "user_participation_status": constants.KICKED_STATUS,
+            "participants": [
+                {
+                    'id': 1,
+                    'user': self.user.to_dict(),
+                    'team': {
+                        'id': 1,
+                        'name': 'test_team',
+                        'image': 'test_image',
+                        'event': self.event,
+                        'is_active': True,
+                    },
+                    'role': constants.LEADER_ROLE,
+                    'status': constants.APPLIED_STATUS,
+                }
+            ]
+        }, error=None)
+        result = services.get_team_service(
+            uow=self.uow, team_id=team.id, username=another_user.username)
         self.assertEqual(expected, result)
 
     def test_get_team_service_should_return_result_with_error_when_team_is_not_found(self):
         expected = Result(data=None, error=exceptions.TeamNotFoundException)
-        result = services.get_team_service(uow=self.uow, team_id=999)
+        result = services.get_team_service(
+            uow=self.uow, team_id=999, username=None)
         self.assertEqual(expected, result)
 
     # # List
     def test_list_team_service_should_return_result_with_teams(self):
-        for _ in range(10):
-            self.create_team(name='new team')
-        expected = Result(data=[team.to_dict()
-                          for team in self.uow.team.list()], error=None)
-        result = services.list_team_service(uow=self.uow)
-        self.assertEqual(expected, result)
+        self.create_team(name='test_team')
+        another_user = self.uow.user.create(username='another_user')
+        self.create_team(name='new team', user=another_user)
 
-    def test_list_team_service_should_return_result_with_filtered_teams(self):
-        another_event = self.uow.event.create(name="another_event")
-        expected_events = []
-        for _ in range(10):
-            self.create_team(name='new team', event=another_event)
-        for _ in range(3):
-            event = self.create_team(name='new team')
-            expected_events.append(event)
-        expected = Result(data=[team.to_dict()
-                          for team in expected_events], error=None)
-        result = services.list_team_service(uow=self.uow, event=self.event)
+        expected = Result(data=[{
+            "id": 1,
+            "name": "test_team",
+            "image": 'test_image',
+            "event": self.event,
+            "is_active": True,
+            "user_participation_status": constants.APPLIED_STATUS,
+            "participants": [
+                {
+                    'id': 1,
+                    'user': self.user.to_dict(),
+                    'team': {
+                        'id': 1,
+                        'name': 'test_team',
+                        'image': 'test_image',
+                        'event': self.event,
+                        'is_active': True,
+                    },
+                    'role': constants.LEADER_ROLE,
+                    'status': constants.APPLIED_STATUS,
+                }
+            ]
+        },
+            {
+            "id": 2,
+            "name": "new team",
+            "image": 'test_image',
+            "event": self.event,
+            "is_active": True,
+            "user_participation_status": None,
+            "participants": [
+                {
+                    'id': 2,
+                    'user': another_user.to_dict(),
+                    'team': {
+                        'id': 2,
+                        'name': 'new team',
+                        'image': 'test_image',
+                        'event': self.event,
+                        'is_active': True,
+                    },
+                    'role': constants.LEADER_ROLE,
+                    'status': constants.APPLIED_STATUS,
+                }
+            ]
+        }], error=None)
+        result = services.list_team_service(
+            uow=self.uow, username=self.user.username)
         self.assertEqual(expected, result)
 
     # # Edit

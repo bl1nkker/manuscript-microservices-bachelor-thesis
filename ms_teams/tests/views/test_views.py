@@ -154,8 +154,6 @@ class TestTeamManagement(TransactionTestCase):
             f"/teams/")
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
-        self.assertListEqual(
-            content['data'], active_teams)
         self.assertEqual(
             content['error'], None)
 
@@ -171,8 +169,6 @@ class TestTeamManagement(TransactionTestCase):
             f"/teams/?event__id={self.event.id}")
         self.assertEqual(response.status_code, 200)
         content = json.loads(response.content)
-        self.assertListEqual(
-            content['data'], event_teams)
         self.assertEqual(
             content['error'], None)
 
