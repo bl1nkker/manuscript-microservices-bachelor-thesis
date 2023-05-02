@@ -36,8 +36,6 @@ PORTS:
 
 TODO:
 
-- rewrite tests
-- github actions
 - telegram bot
 
 - something wrong with notification proxy
