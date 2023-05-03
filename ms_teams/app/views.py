@@ -88,7 +88,7 @@ def team(request, team_id: int):
             return Response(result.to_response(), status=400)
 
 
-@api_view(['POST', 'DELETE', 'GET'])
+@api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def team_participants(request, team_id: int):
     uow = unit_of_work.DjangoORMUnitOfWork()
