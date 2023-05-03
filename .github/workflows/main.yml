@@ -32,6 +32,6 @@ jobs:
         port: 22
         script: |
           cd /var/www/microservices-manuscript-app
-          git pull origin master
+          git pull origin main
           docker-compose build
           docker-compose up -d
