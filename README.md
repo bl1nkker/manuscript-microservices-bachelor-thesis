@@ -38,13 +38,13 @@ TODO:
 
 - telegram bot
 
+* add user participation status to response with team
+* add user update description, phone
+* send notification interface
+
 - something wrong with notification proxy
 - filters
-- add user participation status to response with team
 - add notification status
-- add user update description, phone
-- send notification interface
-
 - add images to response
 - dashboards
 - k8s

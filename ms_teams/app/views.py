@@ -4,6 +4,7 @@ from rest_framework.response import Response
 import service_layer.services as services
 import service_layer.unit_of_work as unit_of_work
 import core.logger as logger
+import core.exceptions as exceptions
 
 
 @api_view(['GET', 'POST'])
@@ -87,34 +88,51 @@ def team(request, team_id: int):
             return Response(result.to_response(), status=400)
 
 
-@api_view(['POST', 'DELETE'])
+@api_view(['POST', 'DELETE', 'GET'])
 @permission_classes([IsAuthenticated])
 def team_participants(request, team_id: int):
     uow = unit_of_work.DjangoORMUnitOfWork()
-    if request.method == 'POST':
-        logger.info(request.user, f"POST /teams/{team_id}/participants")
-        result = services.join_team_request_service(
-            uow, team_id=team_id, username=request.user.username)
-        if result.is_ok:
-            logger.info(
-                request.user, f"POST /teams/{team_id}/participants SUCCESS")
-            return Response(result.to_response(), status=201)
-        else:
-            logger.warning(
-                request.user, f"POST /teams/{team_id}/participants FAIL {result.to_response()}")
-            return Response(result.to_response(), status=400)
-    elif request.method == 'DELETE':
-        logger.info(request.user, f"DELETE /teams/{team_id}/participants")
-        result = services.leave_team_service(
-            uow, team_id=team_id, username=request.user.username)
-        if result.is_ok:
-            logger.info(
-                request.user, f"DELETE /teams/{team_id}/participants SUCCESS")
-            return Response(result.to_response(), status=200)
-        else:
-            logger.warning(
-                request.user, f"DELETE /teams/{team_id}/participants FAIL {result.to_response()}")
-            return Response(result.to_response(), status=400)
+    try:
+        if request.method == 'GET':
+            logger.info(request.user, f"GET /teams/{team_id}/participants")
+            result = services.get_team_requests(
+                uow, team_id=team_id, username=request.user.username)
+            if result.is_ok:
+                logger.info(
+                    request.user, f"GET /teams/{team_id}/participants SUCCESS")
+                return Response(result.to_response(), status=200)
+            else:
+                logger.warning(
+                    request.user, f"DELETE /teams/{team_id}/participants FAIL {result.to_response()}")
+                return Response(result.to_response(), status=400)
+        if request.method == 'POST':
+            logger.info(request.user, f"POST /teams/{team_id}/participants")
+            result = services.join_team_request_service(
+                uow, team_id=team_id, username=request.user.username)
+            if result.is_ok:
+                logger.info(
+                    request.user, f"POST /teams/{team_id}/participants SUCCESS")
+                return Response(result.to_response(), status=201)
+            else:
+                logger.warning(
+                    request.user, f"POST /teams/{team_id}/participants FAIL {result.to_response()}")
+                return Response(result.to_response(), status=400)
+        elif request.method == 'DELETE':
+            logger.info(request.user, f"DELETE /teams/{team_id}/participants")
+            result = services.leave_team_service(
+                uow, team_id=team_id, username=request.user.username)
+            if result.is_ok:
+                logger.info(
+                    request.user, f"DELETE /teams/{team_id}/participants SUCCESS")
+                return Response(result.to_response(), status=200)
+            else:
+                logger.warning(
+                    request.user, f"DELETE /teams/{team_id}/participants FAIL {result.to_response()}")
+                return Response(result.to_response(), status=400)
+    except Exception as e:
+        logger.error(
+            request.user, f"DELETE /teams/{team_id}/participants FAIL {e}")
+        return Response({'message': exceptions.UNKNOWN_EXCEPTION_MESSAGE}, status=400)
 
 
 @api_view(['PUT', 'DELETE'])

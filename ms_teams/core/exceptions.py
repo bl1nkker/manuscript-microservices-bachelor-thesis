@@ -1,3 +1,4 @@
+UNKNOWN_EXCEPTION_MESSAGE = 'An unknown exception occurred.'
 INVALID_TEAM_DATA_EXCEPTION_MESSAGE = "Invalid team data"
 TEAM_NOT_FOUND_EXCEPTION_MESSAGE = "Team not found"
 EVENT_NOT_FOUND_EXCEPTION_MESSAGE = "Event not found"

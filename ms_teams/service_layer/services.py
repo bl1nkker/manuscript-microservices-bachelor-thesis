@@ -88,6 +88,21 @@ def deactivate_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id:
                             "participants": [participant.to_dict() for participant in participants]}, error=None)
 
 
+def get_team_requests(uow: uow.AbstractUnitOfWork, username: str, team_id: int):
+    with uow:
+        team = uow.team.get(id=team_id)
+        if team is None:
+            return Result(data=None, error=exceptions.TeamNotFoundException)
+        user = uow.user.get(username=username)
+        leader = uow.participant.get(
+            user=user, team=team, role=constants.LEADER_ROLE)
+        if not leader or leader.user.username != username:
+            return Result(data=None, error=exceptions.UserIsNotTeamLeaderException)
+        participants = uow.participant.list(
+            team=team, status=constants.PENDING_STATUS)
+        return Result(data=[participant.to_dict() for participant in participants], error=None)
+
+
 def join_team_request_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int):
     with uow:
         team = uow.team.get(id=team_id)
