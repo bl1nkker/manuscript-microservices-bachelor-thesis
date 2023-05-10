@@ -37,15 +37,11 @@ PORTS:
 TODO:
 
 - telegram bot
-
-* add user participation status to response with team
-* add user update description, phone
-* send notification interface
-
-- something wrong with notification proxy
+- rabbitmq clasterization
 - filters
 - add notification status
-- add images to response
+
+- something wrong with notification proxy
 - dashboards
 - k8s
 
