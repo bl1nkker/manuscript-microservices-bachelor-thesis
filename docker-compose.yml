@@ -111,6 +111,14 @@ services:
       - ms_event
     restart: always
 
+  ms_telegram:
+    build: ./ms_telegram
+    container_name: ms_telegram
+    command: sh -c "python -m telegram.py"
+    volumes:
+      - ./ms_telegram:/usr/src/app
+    restart: always
+
   ms_teams_consumer:
     build: ./ms_teams
     container_name: ms_teams_consumer
