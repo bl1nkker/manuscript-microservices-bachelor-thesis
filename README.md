@@ -36,14 +36,13 @@ PORTS:
 
 TODO:
 
-- telegram bot
 - rabbitmq clasterization
 - filters
 - add notification status
 
-- something wrong with notification proxy
-- dashboards
-- k8s
+! something wrong with notification proxy
+! dashboards
+! k8s
 
 if there are any processes:
 
