@@ -163,18 +163,6 @@ services:
       - "80:80"
       - "443:443"
 
-  # For testing
-  # rabbitmq:
-  #   image: rabbitmq:3-management
-  #   ports:
-  #     - "5672:5672" # Expose port 5672 for AMQP
-  #     - "15672:15672" # Expose port 15672 for RabbitMQ management
-  #   environment:
-  #     - RABBITMQ_DEFAULT_USER=manuscript # Set RabbitMQ username
-  #     - RABBITMQ_DEFAULT_PASS=manuscript # Set RabbitMQ password
-  #   volumes:
-  #     - rabbitmq_data:/var/lib/rabbitmq/mnesia # Mount a volume for persistent data
-
 volumes:
   pg_data-event:
   pg_data-users:

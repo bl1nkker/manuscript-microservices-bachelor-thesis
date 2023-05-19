@@ -36,6 +36,7 @@ PORTS:
 
 TODO:
 
+- jenkins
 - rabbitmq clasterization
 - filters
 - add notification status
