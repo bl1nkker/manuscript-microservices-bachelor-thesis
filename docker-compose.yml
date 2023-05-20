@@ -159,6 +159,8 @@ services:
       - ms_event
       - ms_teams
       - ms_users
+      - ms_notifications
+      - rabbitmq
     ports:
       - "80:80"
       - "443:443"
