@@ -9,10 +9,10 @@ import core.logger as logger
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def events(request):
-    uow = unit_of_work.DjangoORMUnitOfWork()
+    logger.info(request.user, f"{request.method} /events")
     try:
+        uow = unit_of_work.DjangoORMUnitOfWork()
         if request.method == 'GET':
-            logger.info(request.user, "GET /events")
             filter_params = {key: value
                              for key, value in request.query_params.items()}
             result = services.list_events_service(uow=uow, **filter_params)
@@ -24,7 +24,6 @@ def events(request):
                     request.user, f"GET /events FAIL: {result.to_response()}")
                 return Response(result.to_response(), status=400)
         elif request.method == 'POST':
-            logger.info(request.user, "POST /events")
             body = {}
             for key, value in request.data.items():
                 if key == 'tags':
@@ -44,16 +43,16 @@ def events(request):
                 return Response(result.to_response(), status=400)
     except Exception as e:
         logger.error(request.user, f"{request.method} /events ERROR: {e}")
-        return Response({"message": "Unknown error"}, status=400)
+        return Response({"message": f"Unknown error: {e}"}, status=400)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def event(request, event_id):
-    uow = unit_of_work.DjangoORMUnitOfWork()
+    logger.info(request.user, f"{request.method} /events/{event_id}")
     try:
+        uow = unit_of_work.DjangoORMUnitOfWork()
         if request.method == 'GET':
-            logger.info(request.user, f"GET /events/{event_id}")
             result = services.get_event_service(uow, id=event_id)
             if result.is_ok:
                 logger.info(request.user, f"GET /events/{event_id} SUCCESS")
@@ -94,4 +93,4 @@ def event(request, event_id):
     except Exception as e:
         logger.error(
             request.user, f"{request.method} /events/{event_id} ERROR: {e}")
-        return Response({"message": "Unknown error"}, status=400)
+        return Response({"message": f"Unknown error: {e}"}, status=400)

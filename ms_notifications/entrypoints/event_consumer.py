@@ -58,44 +58,56 @@ def handle_user_join_request(ch, method, properties, body):
     logger.info(user='CONSUMER',
                 message=f'Handle user join request with body: {body}', logger=logger.mb_logger)
     data = json.loads(body)
-    user = models.ManuscriptUser.objects.get(id=data['user']['id'])
-    notification = models.Notification.objects.create(
-        user=user, message='Join request sent', status=constants.SUCCESS_TYPE)
+    for uid in data['to']:
+        user = data['user']['username']
+        team = data['team']['name']
+        to = models.ManuscriptUser.objects.get(id=uid)
+        models.Notification.objects.create(
+            user=to, message=f'User {user} just sent join request to {team}', status=constants.WARNING_TYPE)
     logger.info(user='CONSUMER',
-                message=f'Notification created: {notification.to_dict()}', logger=logger.mb_logger)
+                message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
 
 def handle_user_left_from_team(ch, method, properties, body):
     logger.info(user='CONSUMER',
                 message=f'Handle user left from team with body: {body}', logger=logger.mb_logger)
     data = json.loads(body)
-    user = models.ManuscriptUser.objects.get(id=data['user']['id'])
-    notification = models.Notification.objects.create(
-        user=user, message='User left from team', status=constants.SUCCESS_TYPE)
+    for uid in data['to']:
+        user = data['user']['username']
+        team = data['team']['name']
+        to = models.ManuscriptUser.objects.get(id=uid)
+        models.Notification.objects.create(
+            user=to, message=f'User {user} left from {team}', status=constants.WARNING_TYPE)
     logger.info(user='CONSUMER',
-                message=f'Notification created: {notification.to_dict()}', logger=logger.mb_logger)
+                message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
 
 def handle_user_join_request_updated(ch, method, properties, body):
     logger.info(user='CONSUMER',
                 message=f'Handle user join request updated with body: {body}', logger=logger.mb_logger)
     data = json.loads(body)
-    user = models.ManuscriptUser.objects.get(id=data['user']['id'])
-    notification = models.Notification.objects.create(
-        user=user, message='Join request updated', status=constants.WARNING_TYPE)
+    for uid in data['to']:
+        user = data['user']['username']
+        team = data['team']['name']
+        to = models.ManuscriptUser.objects.get(id=uid)
+        models.Notification.objects.create(
+            user=to, message=f'{data["action"]} for {to.user.username} inside {team} by user {user}', status=constants.WARNING_TYPE)
     logger.info(user='CONSUMER',
-                message=f'Notification created: {notification.to_dict()}', logger=logger.mb_logger)
+                message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
 
 def handle_user_kicked_from_team(ch, method, properties, body):
     logger.info(user='CONSUMER',
                 message=f'Handle user kicked from team with body: {body}', logger=logger.mb_logger)
     data = json.loads(body)
-    user = models.ManuscriptUser.objects.get(id=data['user']['id'])
-    notification = models.Notification.objects.create(
-        user=user, message='User kicked from team', status=constants.DANGER_TYPE)
+    for uid in data['to']:
+        user = data['user']['username']
+        team = data['team']['name']
+        to = models.ManuscriptUser.objects.get(id=uid)
+        models.Notification.objects.create(
+        user=to, message=f'User {to.user.username} kicked from {team} by user {user}', status=constants.DANGER_TYPE)
     logger.info(user='CONSUMER',
-                message=f'Notification created: {notification.to_dict()}', logger=logger.mb_logger)
+                message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
 if __name__ == '__main__':
     message_broker = mb.RabbitMQ()
