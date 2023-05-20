@@ -30,5 +30,10 @@ RABBITMQ_EXCHANGE_NAME: manuscript.services # default RabbitMQ exchange name
 RABBITMQ_QUEUE: users_queue
 RABBITMQ_USER_CREATE_ROUTING_KEY: USER_REGISTERED
 
-RABBITMQ_TEST_EXCHANGE_NAME: manuscript.services.test # default RabbitMQ exchange name
-RABBITMQ_TEST_QUEUE: user_queue
+RABBITMQ_LOCAL_HOST: rabbitmq
+RABBITMQ_LOCAL_PORT: 5672
+RABBITMQ_LOCAL_VHOST: test
+RABBITMQ_LOCAL_USER: manuscript
+RABBITMQ_LOCAL_PASSWORD: manuscript
+RABBITMQ_LOCAL_EXCHANGE_NAME: manuscript.services
+RABBITMQ_LOCAL_QUEUE: event_queue

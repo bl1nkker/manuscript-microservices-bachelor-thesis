@@ -62,8 +62,7 @@ def deactivate_event_service(uow: uow.AbstractUnitOfWork, id: int, username: str
 def handle_publish_message_on_event_created(data):
     try:
         if settings.DEBUG:
-            message_broker = mb.RabbitMQ(
-                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+            return
         else:
             message_broker = mb.RabbitMQ()
         with message_broker:
@@ -79,8 +78,7 @@ def handle_publish_message_on_event_created(data):
 def handle_publish_message_on_event_edited(data):
     try:
         if settings.DEBUG:
-            message_broker = mb.RabbitMQ(
-                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+            return
         else:
             message_broker = mb.RabbitMQ()
 

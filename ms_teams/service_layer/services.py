@@ -208,14 +208,7 @@ def leave_team_service(uow: uow.AbstractUnitOfWork, username: str, team_id: int)
 def handle_publish_message_on_team_services(data: dict, routing_key):
     try:
         if settings.DEBUG:
-            message_broker = mb.RabbitMQ(
-                host=settings.RABBITMQ_TEST_HOST,
-                port=settings.RABBITMQ_TEST_PORT,
-                username=settings.RABBITMQ_TEST_USER,
-                password=settings.RABBITMQ_TEST_PASSWORD,
-                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME,
-                vhost='test'
-            )
+            return
         else:
             message_broker = mb.RabbitMQ()
         with message_broker:

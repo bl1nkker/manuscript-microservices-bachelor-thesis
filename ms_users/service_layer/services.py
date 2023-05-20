@@ -54,8 +54,7 @@ def get_me_service(uow: uow.AbstractUnitOfWork, user) -> Result:
 def handle_publish_message_on_user_created(user):
     try:
         if settings.DEBUG:
-            message_broker = mb.RabbitMQ(
-                exchange=settings.RABBITMQ_TEST_EXCHANGE_NAME)
+            return
         else:
             message_broker = mb.RabbitMQ()
         with message_broker:

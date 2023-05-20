@@ -6,6 +6,14 @@ RABBITMQ_PASSWORD: nZ9zXTyLeXqx85E3wS2p_8nKvOFnxqBm
 RABBITMQ_EXCHANGE_NAME: manuscript.services # default RabbitMQ exchange name
 RABBITMQ_QUEUE: notifications_queue
 
+RABBITMQ_LOCAL_HOST: rabbitmq
+RABBITMQ_LOCAL_PORT: 5672
+RABBITMQ_LOCAL_VHOST: test
+RABBITMQ_LOCAL_USER: manuscript
+RABBITMQ_LOCAL_PASSWORD: manuscript
+RABBITMQ_LOCAL_EXCHANGE_NAME: manuscript.services
+RABBITMQ_LOCAL_QUEUE: event_queue
+
 RABBITMQ_QUEUE_USER_CREATED: notifications_queue.user.created
 RABBITMQ_QUEUE_USER_LEFT_FROM_TEAM: notifications_queue.user.left.from.team
 RABBITMQ_QUEUE_USER_JOIN_REQUEST: notifications_queue.user.join.request
