@@ -54,9 +54,6 @@ services:
   ms_event:
     build: ./ms_event
     container_name: ms_event
-    command: sh -c "python manage.py makemigrations && python manage.py migrate && gunicorn ms_event.wsgi:application -c gunicorn.conf.py"
-    volumes:
-      - ./ms_event:/usr/src/app
     ports:
       - "16010:16010"
     depends_on:

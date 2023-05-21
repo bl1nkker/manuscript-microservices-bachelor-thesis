@@ -36,12 +36,13 @@ PORTS:
 
 TODO:
 
+- docker orchestration tool
+- nocodb
 - jenkins
 - rabbitmq clasterization
+- get participation requests list
 - filters
-- add notification status
 
-! something wrong with notification proxy
 ! dashboards
 ! k8s
 
