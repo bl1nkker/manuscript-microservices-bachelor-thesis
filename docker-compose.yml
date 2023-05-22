@@ -59,6 +59,8 @@ services:
     depends_on:
       - ms_event_db
     restart: always
+    environment:
+      - SERVICE_TYPE=service
 
   ms_teams:
     build: ./ms_teams
@@ -100,13 +102,11 @@ services:
   ms_event_consumer:
     build: ./ms_event
     container_name: ms_event_consumer
-    command: sh -c "python -m entrypoints.event_consumer"
-    volumes:
-      - ./ms_event:/usr/src/app
     depends_on:
-      - ms_event_db
       - ms_event
     restart: always
+    environment:
+      - SERVICE_TYPE=consumer
 
   ms_telegram:
     build: ./ms_telegram
