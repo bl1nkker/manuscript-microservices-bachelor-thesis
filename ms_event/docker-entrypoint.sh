@@ -9,5 +9,5 @@ if [ "$SERVICE_TYPE" = "service" ]; then
 elif [ "$SERVICE_TYPE" = "consumer" ]; then
   # Run the event consumer command
   ./wait-for-it.sh ms_event:16010 --
-  ./wait-for-it.sh rabbitmq:5672 -- python -m entrypoints.event_consumer
+  ./wait-for-it.sh rabbitmq:5672 -- python3 -m entrypoints.event_consumer
 fi
