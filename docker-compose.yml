@@ -52,7 +52,7 @@ services:
 
   # Web Apps
   ms_event:
-    build: ./ms_event
+    image: blinkker/ms_event:latest
     container_name: ms_event
     ports:
       - "16010:16010"
@@ -63,7 +63,7 @@ services:
       - SERVICE_TYPE=service
 
   ms_teams:
-    build: ./ms_teams
+    image: blinkker/ms_teams:latest
     container_name: ms_teams
     ports:
       - "16020:16020"
@@ -74,7 +74,7 @@ services:
       - SERVICE_TYPE=service
 
   ms_users:
-    build: ./ms_users
+    image: blinkker/ms_users:latest
     container_name: ms_users
     ports:
       - "16030:16030"
@@ -85,7 +85,7 @@ services:
       - SERVICE_TYPE=service
 
   ms_notifications:
-    build: ./ms_notifications
+    image: blinkker/ms_notifications:latest
     container_name: ms_notifications
     ports:
       - "16040:16040"
@@ -96,13 +96,13 @@ services:
       - SERVICE_TYPE=service
 
   ms_telegram:
-    build: ./ms_telegram
+    image: blinkker/ms_telegram:latest
     container_name: ms_telegram
     restart: always
 
   # Consumers
   ms_event_consumer:
-    build: ./ms_event
+    image: blinkker/ms_event:latest
     container_name: ms_event_consumer
     depends_on:
       - ms_event
@@ -111,7 +111,7 @@ services:
       - SERVICE_TYPE=consumer
 
   ms_teams_consumer:
-    build: ./ms_teams
+    image: blinkker/ms_teams:latest
     container_name: ms_teams_consumer
     depends_on:
       - ms_teams
@@ -120,7 +120,7 @@ services:
       - SERVICE_TYPE=consumer
 
   ms_notifications_consumer:
-    build: ./ms_notifications
+    image: blinkker/ms_notifications:latest
     container_name: ms_notifications_consumer
     depends_on:
       - ms_notifications
@@ -130,7 +130,7 @@ services:
 
   # Proxy
   nginx-proxy:
-    build: ./proxy
+    image: blinkker/proxy:latest
     container_name: nginx-proxy
     depends_on:
       - ms_event

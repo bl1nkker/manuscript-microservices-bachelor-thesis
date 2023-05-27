@@ -3,8 +3,8 @@
 if [ "$SERVICE_TYPE" = "service" ]; then
   # Run the gunicorn command
   ./wait-for-it.sh ms_users_db:5432 -- 
-  python manage.py makemigrations
-  python manage.py migrate
+  python3 manage.py makemigrations
+  python3 manage.py migrate
   exec gunicorn ms_users.wsgi:application -c gunicorn.conf.py
 elif [ "$SERVICE_TYPE" = "consumer" ]; then
   # Run the event consumer command
