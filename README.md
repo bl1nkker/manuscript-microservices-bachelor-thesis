@@ -1,4 +1,4 @@
-# Manuscript App Micrservices
+# Manuscript App Microservices
 
 ## How to get started locally
 
