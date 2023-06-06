@@ -146,13 +146,13 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672" # Expose port 5672 for AMQP
-      - "15672:15672" # Expose port 15672 for RabbitMQ management
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=manuscript # Set RabbitMQ username
-      - RABBITMQ_DEFAULT_PASS=manuscript # Set RabbitMQ password
+      - RABBITMQ_DEFAULT_USER=manuscript
+      - RABBITMQ_DEFAULT_PASS=manuscript
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq/mnesia # Mount a volume for persistent data
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia
 
 volumes:
   pg_data-event:
