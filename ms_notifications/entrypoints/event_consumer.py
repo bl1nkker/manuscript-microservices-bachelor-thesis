@@ -63,7 +63,7 @@ def handle_user_join_request(ch, method, properties, body):
         team = data['team']['name']
         to = models.ManuscriptUser.objects.get(id=uid)
         models.Notification.objects.create(
-            user=to, message=f'User {user} just sent join request to {team}', status=constants.WARNING_TYPE)
+            user=to, message=f'Пользователь {user} отправил запрос на присоединение к команде {team}', status=constants.WARNING_TYPE)
     logger.info(user='CONSUMER',
                 message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
@@ -77,7 +77,7 @@ def handle_user_left_from_team(ch, method, properties, body):
         team = data['team']['name']
         to = models.ManuscriptUser.objects.get(id=uid)
         models.Notification.objects.create(
-            user=to, message=f'User {user} left from {team}', status=constants.WARNING_TYPE)
+            user=to, message=f'Пользователь {user} вышел из команды {team}', status=constants.WARNING_TYPE)
     logger.info(user='CONSUMER',
                 message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
@@ -91,7 +91,7 @@ def handle_user_join_request_updated(ch, method, properties, body):
         team = data['team']['name']
         to = models.ManuscriptUser.objects.get(id=uid)
         models.Notification.objects.create(
-            user=to, message=f'{data["action"]} for {to.user.username} inside {team} by user {user}', status=constants.WARNING_TYPE)
+            user=to, message=f'Пользователь {to.user.username} был {data["action"]} в команде {team} пользователем {user}', status=constants.WARNING_TYPE)
     logger.info(user='CONSUMER',
                 message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
@@ -105,7 +105,7 @@ def handle_user_kicked_from_team(ch, method, properties, body):
         team = data['team']['name']
         to = models.ManuscriptUser.objects.get(id=uid)
         models.Notification.objects.create(
-        user=to, message=f'User {to.user.username} kicked from {team} by user {user}', status=constants.DANGER_TYPE)
+        user=to, message=f'Пользователь {to.user.username} исключен из команды {team} пользователем {user}', status=constants.DANGER_TYPE)
     logger.info(user='CONSUMER',
                 message=f'Notifications created to {data["to"]}', logger=logger.mb_logger)
 
