@@ -53,7 +53,7 @@ if there are any processes:
 
 
 ### Executables:
-up:
+`up:
 	docker-compose up --build
 
 down:
@@ -62,13 +62,11 @@ down:
 rq:
 	brew services start rabbitmq
 
-# docker volume rm $(docker volume ls -q)
-
 build:
 	cd ms_event && docker build -t ms_event . && docker tag ms_event blinkker/ms_event:latest && docker push blinkker/ms_event:latest
 	cd ms_teams && docker build -t ms_teams . && docker tag ms_teams blinkker/ms_teams:latest && docker push blinkker/ms_teams:latest
 	cd ms_users && docker build -t ms_users . && docker tag ms_users blinkker/ms_users:latest && docker push blinkker/ms_users:latest
 	cd ms_notifications && docker build -t ms_notifications . && docker tag ms_notifications blinkker/ms_notifications:latest && docker push blinkker/ms_notifications:latest
 	cd ms_telegram && docker build -t ms_telegram . && docker tag ms_telegram blinkker/ms_telegram:latest && docker push blinkker/ms_telegram:latest
-	cd proxy && docker build -t proxy . && docker tag proxy blinkker/proxy:latest && docker push blinkker/proxy:latest
+	cd proxy && docker build -t proxy . && docker tag proxy blinkker/proxy:latest && docker push blinkker/proxy:latest`
 	
